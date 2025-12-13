@@ -71,7 +71,11 @@ const Login = () => {
               <input type="checkbox" className="w-4 h-4 rounded border-slate-300 dark:border-navy-600 text-navy-900 focus:ring-navy-900 mr-2" />
               Remember me
             </label>
-            <button type="button" className="text-navy-900 dark:text-gold-500 hover:text-gold-600 dark:hover:text-gold-400 font-medium transition-colors">
+            <button 
+              type="button" 
+              onClick={() => navigate('/forgot-password')}
+              className="text-navy-900 dark:text-gold-500 hover:text-gold-600 dark:hover:text-gold-400 font-medium transition-colors"
+            >
               Forgot password?
             </button>
           </div>

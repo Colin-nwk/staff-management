@@ -15,6 +15,7 @@ import Settings from './pages/Settings';
 import BioData from './pages/BioData';
 import Complaints from './pages/Complaints';
 import Policies from './pages/Policies';
+import ForgotPassword from './pages/ForgotPassword';
 
 // --- Theme Context ---
 type Theme = 'light' | 'dark';
@@ -153,6 +154,7 @@ const AppContent = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       
       {/* Protected Routes */}
       <Route path="/" element={
