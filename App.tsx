@@ -16,6 +16,7 @@ import BioData from './pages/BioData';
 import Complaints from './pages/Complaints';
 import Policies from './pages/Policies';
 import ForgotPassword from './pages/ForgotPassword';
+import Modules from './pages/Modules';
 
 // --- Theme Context ---
 type Theme = 'light' | 'dark';
@@ -156,8 +157,15 @@ const AppContent = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       
-      {/* Protected Routes */}
+      {/* Module Selection (Home) */}
       <Route path="/" element={
+        <ProtectedRoute>
+          <Modules />
+        </ProtectedRoute>
+      } />
+
+      {/* Staff Module Routes */}
+      <Route path="/staff-dashboard" element={
         <ProtectedRoute>
           <Layout user={user!} onLogout={logout} pendingApprovals={pendingCount}>
             <Dashboard />

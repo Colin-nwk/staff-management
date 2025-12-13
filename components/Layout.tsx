@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
@@ -20,7 +20,8 @@ import {
   HelpCircle,
   CreditCard,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  LayoutGrid
 } from 'lucide-react';
 import { User } from '../types';
 import { cn } from './ui/Components';
@@ -103,6 +104,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
 
   const getPageTitle = () => {
     const path = location.pathname.substring(1);
+    if (path.includes('staff-dashboard')) return 'Dashboard';
     if (!path) return 'Dashboard';
     const mainSection = path.split('/')[0];
     return mainSection.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -150,20 +152,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
           "fixed inset-y-0 left-0 z-50 bg-navy-900 text-white transform transition-all duration-300 ease-in-out border-r border-navy-800 shadow-2xl flex flex-col",
           // Mobile vs Desktop widths and visibility
           isSidebarOpen ? "translate-x-0 w-72" : "-translate-x-full lg:translate-x-0",
-          "lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:scrollbar-hide", // Changed to sticky h-screen
+          "lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:scrollbar-hide", 
           isCollapsed ? "lg:w-20" : "lg:w-72" 
         )}
       >
         {/* Logo Area */}
         <div className={cn("h-16 flex items-center border-b border-navy-800 transition-all duration-300 flex-shrink-0", isCollapsed ? "justify-center px-0" : "px-6 justify-between")}>
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-navy-950 font-serif font-bold text-xl shadow-lg shadow-gold-500/20 flex-shrink-0">
               N
             </div>
             {!isCollapsed && (
                <span className="font-serif text-2xl font-medium tracking-tight text-slate-100 whitespace-nowrap overflow-hidden transition-all duration-300">Nexus</span>
             )}
-          </div>
+          </Link>
           <button 
             onClick={() => setIsSidebarOpen(false)}
             className="lg:hidden text-slate-400 hover:text-white p-1"
@@ -176,11 +178,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-hide">
           {!isCollapsed && (
              <div className="mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans transition-opacity duration-300">
-               Main Menu
+               Staff Module
              </div>
           )}
           
-          <NavigationItem to="/" icon={LayoutDashboard} label="Dashboard" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
+          <NavigationItem to="/staff-dashboard" icon={LayoutDashboard} label="Dashboard" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
           <NavigationItem to="/policies" icon={BookOpen} label="Policies" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
           <NavigationItem to="/documents" icon={FileText} label="Documents" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
           <NavigationItem to="/complaints" icon={MessageSquare} label="Help Desk" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
@@ -217,6 +219,15 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
                <NavigationItem to="/settings" icon={Settings} label="Settings" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
             </>
           )}
+
+           {/* App Switcher */}
+            {!isCollapsed && (
+                  <div className="mt-8 mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans animate-in fade-in">
+                    Navigation
+                  </div>
+            )}
+            {isCollapsed && <div className="h-4"></div>}
+            <NavigationItem to="/" icon={LayoutGrid} label="All Modules" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
         </nav>
         
         {/* Sidebar Footer / Collapse Toggle */}
@@ -419,6 +430,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
                             className="flex w-full items-center gap-3 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-navy-700/50 rounded-lg transition-colors"
                         >
                             <CreditCard className="w-4 h-4" /> Billing
+                        </button>
+                         <button 
+                             onClick={() => { navigate('/'); setIsUserMenuOpen(false); }}
+                            className="flex w-full items-center gap-3 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-navy-700/50 rounded-lg transition-colors"
+                        >
+                            <LayoutGrid className="w-4 h-4" /> Switch Module
                         </button>
                         <div className="h-px bg-slate-100 dark:bg-navy-700 my-1 mx-2"></div>
                          <button 
