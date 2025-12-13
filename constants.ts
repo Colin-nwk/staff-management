@@ -62,6 +62,7 @@ export const MOCK_USERS: User[] = [
 export const MOCK_DOCUMENTS: Document[] = [
   { 
     id: 'd1', 
+    userId: 'u1',
     title: 'Employment Contract', 
     category: 'Contract', 
     status: 'approved', 
@@ -75,6 +76,7 @@ export const MOCK_DOCUMENTS: Document[] = [
   },
   { 
     id: 'd2', 
+    userId: 'u1',
     title: 'Driver\'s License', 
     category: 'ID', 
     status: 'pending', 
@@ -98,6 +100,7 @@ export const MOCK_DOCUMENTS: Document[] = [
   },
   { 
     id: 'd3', 
+    userId: 'u1',
     title: 'AWS Certification', 
     category: 'Certificate', 
     status: 'approved', 
@@ -111,6 +114,7 @@ export const MOCK_DOCUMENTS: Document[] = [
   },
   { 
     id: 'd4', 
+    userId: 'u4',
     title: 'Tax Form W-2', 
     category: 'Other', 
     status: 'rejected', 
@@ -122,6 +126,20 @@ export const MOCK_DOCUMENTS: Document[] = [
     history: [],
     notes: '2023 Tax Return'
   },
+  {
+    id: 'd5',
+    userId: 'u2', // HR User
+    title: 'HR Certification',
+    category: 'Certificate',
+    status: 'approved',
+    dateUploaded: '2023-05-15',
+    size: '1.8 MB',
+    type: 'PDF',
+    uploadedBy: 'Marcus Reynolds',
+    version: 1,
+    history: [],
+    notes: 'SHRM Certification'
+  }
 ];
 
 export const MOCK_NOTIFICATIONS: Notification[] = [

@@ -49,6 +49,7 @@ export interface DocumentVersion {
 
 export interface Document {
   id: string;
+  userId: string; // Added to track ownership
   title: string;
   category: 'ID' | 'Certificate' | 'Contract' | 'Other';
   status: 'approved' | 'pending' | 'rejected';
@@ -79,7 +80,7 @@ export interface ApprovalItem {
   detail: string;
   date: string;
   status: 'pending' | 'approved' | 'rejected' | 'partially_approved';
-  data?: any; // Payload for bio data review
+  data?: any; // Payload for bio data review or linked document ID
   fieldStatuses?: Record<string, 'approved' | 'rejected'>; // For HR review state
 }
 

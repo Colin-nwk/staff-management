@@ -1,8 +1,8 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout';
-import { MOCK_USERS, MOCK_NOTIFICATIONS } from './constants';
-import { User, Role, ApprovalItem, Complaint, Message, Notification } from './types';
+import { MOCK_USERS, MOCK_NOTIFICATIONS, MOCK_DOCUMENTS } from './constants';
+import { User, Role, ApprovalItem, Complaint, Message, Notification, Document } from './types';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -61,6 +61,22 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const useNotifications = () => {
   const context = useContext(NotificationContext);
   if (!context) throw new Error('useNotifications must be used within a NotificationProvider');
+  return context;
+};
+
+// --- Document Context ---
+interface DocumentContextType {
+  documents: Document[];
+  addDocument: (doc: Document) => void;
+  updateDocument: (doc: Document) => void;
+  updateDocumentStatus: (id: string, status: 'approved' | 'rejected') => void;
+}
+
+const DocumentContext = createContext<DocumentContextType | undefined>(undefined);
+
+export const useDocuments = () => {
+  const context = useContext(DocumentContext);
+  if (!context) throw new Error('useDocuments must be used within a DocumentProvider');
   return context;
 };
 
@@ -214,10 +230,25 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Document State (Shared)
+  const [documents, setDocuments] = useState<Document[]>(MOCK_DOCUMENTS);
+
+  const addDocument = (doc: Document) => {
+    setDocuments(prev => [doc, ...prev]);
+  };
+
+  const updateDocument = (updatedDoc: Document) => {
+    setDocuments(prev => prev.map(d => d.id === updatedDoc.id ? updatedDoc : d));
+  };
+
+  const updateDocumentStatus = (id: string, status: 'approved' | 'rejected') => {
+    setDocuments(prev => prev.map(d => d.id === id ? { ...d, status } : d));
+  };
+
   // Approval State
   const [approvals, setApprovals] = useState<ApprovalItem[]>([
     { id: '1', type: 'Profile Update', user: 'John Doe', detail: 'Changed Address', date: '2 hours ago', status: 'pending' },
-    { id: '2', type: 'Document', user: 'Sarah Chen', detail: 'Driver License Upload', date: '5 hours ago', status: 'pending' },
+    { id: '2', type: 'Document', user: 'Sarah Chen', detail: 'Driver License Upload', date: '5 hours ago', status: 'pending', data: { documentId: 'd2' } },
     { id: '3', type: 'Leave Request', user: 'Marcus Reynolds', detail: 'Annual Leave (5 days)', date: '1 day ago', status: 'pending' },
   ]);
 
@@ -318,6 +349,12 @@ export default function App() {
   const processApproval = (id: string, status: 'approved' | 'rejected' | 'partially_approved', fieldStatuses?: Record<string, 'approved' | 'rejected'>) => {
     setApprovals(prev => prev.map(item => {
       if (item.id === id) {
+        
+        // If this is a document approval, update the document status as well
+        if (item.type === 'Document' && item.data?.documentId) {
+             updateDocumentStatus(item.data.documentId, status as 'approved' | 'rejected');
+        }
+
         const targetUser = MOCK_USERS.find(u => `${u.firstName} ${u.lastName}` === item.user);
         if (targetUser) {
            addNotification({
@@ -435,13 +472,15 @@ export default function App() {
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <AuthContext.Provider value={{ user, login, logout, isLoading }}>
         <NotificationContext.Provider value={{ notifications: userNotifications, unreadCount, addNotification, markAsRead, markAllAsRead }}>
-          <ApprovalContext.Provider value={{ approvals, addApproval, processApproval }}>
-            <ComplaintContext.Provider value={{ complaints, createComplaint, sendMessage, updateStatus }}>
-              <Router>
-                <AppContent />
-              </Router>
-            </ComplaintContext.Provider>
-          </ApprovalContext.Provider>
+          <DocumentContext.Provider value={{ documents, addDocument, updateDocument, updateDocumentStatus }}>
+            <ApprovalContext.Provider value={{ approvals, addApproval, processApproval }}>
+              <ComplaintContext.Provider value={{ complaints, createComplaint, sendMessage, updateStatus }}>
+                <Router>
+                  <AppContent />
+                </Router>
+              </ComplaintContext.Provider>
+            </ApprovalContext.Provider>
+          </DocumentContext.Provider>
         </NotificationContext.Provider>
       </AuthContext.Provider>
     </ThemeContext.Provider>
