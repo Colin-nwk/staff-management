@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { MOCK_USERS } from '../constants';
 import { Card, Input, Button, Badge, Modal } from '../components/ui/Components';
-import { Search, Filter, Phone, MapPin, UserPlus, Edit2, Trash2, ChevronDown, ChevronUp, ChevronsUpDown, ChevronLeft, ChevronRight, Settings2, Download, Trash, Check } from 'lucide-react';
+import { Search, Filter, Phone, MapPin, UserPlus, Edit2, Trash2, ChevronDown, ChevronUp, ChevronsUpDown, ChevronLeft, ChevronRight, Settings2, Download, Trash, Check, RefreshCw } from 'lucide-react';
 import { useAuth } from '../App';
 import { User, Role } from '../types';
 import {
@@ -66,7 +66,14 @@ const StaffList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   
+  const generateStaffId = () => {
+    const year = new Date().getFullYear().toString().slice(-2);
+    const random = Math.floor(1000 + Math.random() * 9000);
+    return `NEX-${year}-${random}`;
+  };
+
   const initialFormState = {
+    id: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -118,6 +125,7 @@ const StaffList = () => {
     setEditingUser(null);
     setFormData({
       ...initialFormState,
+      id: generateStaffId(),
       role: currentUser?.role === 'hr' ? 'staff' : 'hr'
     });
     setIsModalOpen(true);
@@ -126,6 +134,7 @@ const StaffList = () => {
   const handleOpenEdit = (user: User) => {
     setEditingUser(user);
     setFormData({
+      id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
@@ -149,26 +158,17 @@ const StaffList = () => {
   const handleBulkDelete = () => {
     const selectedIds = Object.keys(rowSelection);
     if (window.confirm(`Are you sure you want to delete ${selectedIds.length} users?`)) {
-       // In a real app, you would filter by ID, but here rowSelection keys are indices if not configured otherwise.
-       // However, react-table default row id is index. We need to map them to user IDs.
        const selectedIndices = Object.keys(rowSelection).map(Number);
-       // We need to act on the *filtered* data that the table is currently displaying to map indices correctly,
-       // OR typically standard practice is to use getRowId option in table to use user.id.
-       // Let's rely on the table instance row model.
     }
   };
   
-  // Actually, we need to access the table instance to get the real rows for bulk delete.
-  // We'll implement the logic inside the render where `table` is available or move `table` up.
-  // For simplicity, I'll define `table` first then use it.
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingUser) {
       setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...formData } : u));
     } else {
       const newUser: User = {
-        id: `u${Date.now()}`,
+        id: formData.id,
         joinDate: new Date().toISOString().split('T')[0],
         avatarUrl: `https://ui-avatars.com/api/?name=${formData.firstName}+${formData.lastName}&background=random`,
         ...formData
@@ -261,9 +261,9 @@ const StaffList = () => {
         </Badge>
       )
     }),
-    columnHelper.accessor('joinDate', {
-        header: 'Join Date',
-        cell: info => <span className="text-slate-600 dark:text-slate-300">{info.getValue()}</span>
+    columnHelper.accessor('id', {
+        header: 'Staff ID',
+        cell: info => <span className="font-mono text-xs text-slate-500 dark:text-slate-400">{info.getValue().toUpperCase()}</span>
     }),
     columnHelper.accessor('phone', {
       header: 'Contact',
@@ -312,7 +312,8 @@ const StaffList = () => {
       const matchesSearch = 
         user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) || 
         user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase());
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.id.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesRole = filterRole === 'all' || user.role === filterRole;
       const matchesStatus = filterStatus === 'all' || user.status === filterStatus;
@@ -382,7 +383,7 @@ const StaffList = () => {
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                 <Input 
-                    placeholder="Search name, email..." 
+                    placeholder="Search name, ID, email..." 
                     className="pl-9 bg-white dark:bg-navy-900"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -604,6 +605,30 @@ const StaffList = () => {
         className="max-w-xl"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex gap-3 items-end">
+             <div className="flex-1">
+                <Input 
+                  label="Staff ID" 
+                  required 
+                  value={formData.id}
+                  onChange={e => setFormData({...formData, id: e.target.value})}
+                  disabled={!!editingUser} 
+                  className="font-mono"
+                />
+             </div>
+             {!editingUser && (
+                <Button 
+                   type="button" 
+                   variant="outline"
+                   onClick={() => setFormData({...formData, id: generateStaffId()})}
+                   title="Generate New ID"
+                   className="mb-[2px]"
+                >
+                   <RefreshCw className="w-4 h-4" />
+                </Button>
+             )}
+          </div>
+        
           <div className="grid grid-cols-2 gap-4">
             <Input 
               label="First Name" 
