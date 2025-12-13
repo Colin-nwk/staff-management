@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useAuth, useApprovals, useNotifications } from '../App';
+import { useAuth, useApprovals, useNotifications, usePolicies } from '../App';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Modal, Input, TextArea } from '../components/ui/Components';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { Clock, Calendar, FileText, CheckCircle, ArrowUpRight, ArrowRight, UploadCloud, UserCircle, Users } from 'lucide-react';
+import { Clock, Calendar, FileText, CheckCircle, ArrowUpRight, ArrowRight, UploadCloud, UserCircle, Users, Download, Shield } from 'lucide-react';
+import { Policy } from '../types';
 
 const StatCard = ({ title, value, sub, icon: Icon, color = 'navy' }: any) => (
   <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300">
@@ -173,8 +174,61 @@ const StaffDashboard = () => {
 };
 
 const HRDashboard = () => {
+  const { user } = useAuth();
   const { approvals } = useApprovals();
+  const { addNotification } = useNotifications();
+  const { addPolicy } = usePolicies();
+  const navigate = useNavigate();
   const pendingCount = approvals.filter(a => a.status === 'pending').length;
+
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Report State
+  const [reportConfig, setReportConfig] = useState({ type: 'Attendance', range: 'This Month', format: 'PDF' });
+  // Policy State
+  const [policyConfig, setPolicyConfig] = useState({ title: '', content: '' });
+
+  const handleGenerateReport = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      setIsReportModalOpen(false);
+      alert(`${reportConfig.type} Report (${reportConfig.range}) has been generated in ${reportConfig.format} format.`);
+    }, 2000);
+  };
+
+  const handleUpdatePolicy = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setIsProcessing(true);
+    
+    setTimeout(() => {
+      // Add policy to context
+      const newPolicy: Policy = {
+          id: `p${Date.now()}`,
+          title: policyConfig.title,
+          content: policyConfig.content,
+          version: '1.0',
+          dateUpdated: new Date().toISOString().split('T')[0],
+          category: 'General', // Defaulting for simplicity
+          uploadedBy: `${user.firstName} ${user.lastName}`
+      };
+      addPolicy(newPolicy);
+
+      setIsProcessing(false);
+      setIsPolicyModalOpen(false);
+      addNotification({
+        title: 'Policy Updated',
+        message: `New policy: "${policyConfig.title}" has been published.`,
+        type: 'info',
+        targetRole: 'all'
+      });
+      setPolicyConfig({ title: '', content: '' });
+    }, 1500);
+  };
 
   const data = [
     { name: 'Mon', active: 40, leave: 2 },
@@ -216,25 +270,140 @@ const HRDashboard = () => {
         <Card>
           <h3 className="font-serif text-xl font-medium text-navy-900 dark:text-white mb-6">Quick Actions</h3>
           <div className="space-y-3">
-            <Button variant="primary" className="w-full justify-between group">
+            <Button variant="primary" className="w-full justify-between group" onClick={() => navigate('/approvals')}>
               <span>Approve Leave Requests</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="outline" className="w-full justify-between group">
+            <Button variant="outline" className="w-full justify-between group" onClick={() => navigate('/staff')}>
               <span>Add New Staff</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="outline" className="w-full justify-between group">
+            <Button variant="outline" className="w-full justify-between group" onClick={() => setIsReportModalOpen(true)}>
               <span>Generate Report</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="outline" className="w-full justify-between group">
+            <Button variant="outline" className="w-full justify-between group" onClick={() => setIsPolicyModalOpen(true)}>
               <span>Update Policies</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
         </Card>
       </div>
+
+      {/* Generate Report Modal */}
+      <Modal 
+        isOpen={isReportModalOpen} 
+        onClose={() => setIsReportModalOpen(false)} 
+        title="Generate HR Report"
+      >
+        <form onSubmit={handleGenerateReport} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Report Type</label>
+            <select 
+              className="w-full h-10 rounded-md border border-slate-300 dark:border-navy-600 bg-white dark:bg-navy-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-gold-500"
+              value={reportConfig.type}
+              onChange={(e) => setReportConfig({...reportConfig, type: e.target.value})}
+            >
+              <option value="Attendance">Attendance Report</option>
+              <option value="Payroll">Payroll Summary</option>
+              <option value="Performance">Staff Performance</option>
+              <option value="Leave">Leave Balance & Usage</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Date Range</label>
+            <select 
+              className="w-full h-10 rounded-md border border-slate-300 dark:border-navy-600 bg-white dark:bg-navy-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-gold-500"
+              value={reportConfig.range}
+              onChange={(e) => setReportConfig({...reportConfig, range: e.target.value})}
+            >
+              <option value="This Week">This Week</option>
+              <option value="This Month">This Month</option>
+              <option value="Last Month">Last Month</option>
+              <option value="Year to Date">Year to Date</option>
+              <option value="Custom">Custom Range</option>
+            </select>
+          </div>
+
+          <div>
+             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Format</label>
+             <div className="flex gap-4">
+               {['PDF', 'Excel', 'CSV'].map(fmt => (
+                 <label key={fmt} className="flex items-center cursor-pointer">
+                   <input 
+                      type="radio" 
+                      name="format" 
+                      value={fmt}
+                      checked={reportConfig.format === fmt} 
+                      onChange={() => setReportConfig({...reportConfig, format: fmt})}
+                      className="mr-2 text-navy-900 focus:ring-navy-900" 
+                    />
+                   <span className="text-sm text-slate-700 dark:text-slate-300">{fmt}</span>
+                 </label>
+               ))}
+             </div>
+          </div>
+
+          <div className="bg-blue-50 dark:bg-navy-800 p-3 rounded-lg flex items-start gap-3">
+             <Download className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+             <div>
+               <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Ready to export</p>
+               <p className="text-xs text-blue-700 dark:text-blue-300">The report will be downloaded to your device automatically upon generation.</p>
+             </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-navy-700">
+             <Button type="button" variant="ghost" onClick={() => setIsReportModalOpen(false)}>Cancel</Button>
+             <Button type="submit" isLoading={isProcessing}>Generate Report</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Update Policy Modal */}
+      <Modal 
+        isOpen={isPolicyModalOpen} 
+        onClose={() => setIsPolicyModalOpen(false)} 
+        title="Update Company Policies"
+      >
+        <form onSubmit={handleUpdatePolicy} className="space-y-4">
+          <Input 
+            label="Policy Title" 
+            placeholder="e.g. Remote Work Guidelines 2024" 
+            required
+            value={policyConfig.title}
+            onChange={(e) => setPolicyConfig({...policyConfig, title: e.target.value})}
+          />
+          
+          <TextArea 
+            label="Policy Summary / Change Log"
+            placeholder="Briefly describe the changes or paste the policy content here..."
+            rows={4}
+            required
+            value={policyConfig.content}
+            onChange={(e) => setPolicyConfig({...policyConfig, content: e.target.value})}
+          />
+
+          <div className="border-2 border-dashed border-slate-300 dark:border-navy-600 rounded-lg p-6 text-center hover:bg-slate-50 dark:hover:bg-navy-800 transition-colors cursor-pointer">
+             <UploadCloud className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+             <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">Upload Policy Document (PDF)</p>
+             <p className="text-xs text-slate-400 mt-1">Optional. Max 5MB.</p>
+          </div>
+
+          <div className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg flex items-start gap-3">
+             <Shield className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+             <div>
+               <p className="text-sm font-medium text-amber-900 dark:text-amber-100">Staff Notification</p>
+               <p className="text-xs text-amber-700 dark:text-amber-300">All active staff members will receive a notification about this policy update.</p>
+             </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-navy-700">
+             <Button type="button" variant="ghost" onClick={() => setIsPolicyModalOpen(false)}>Cancel</Button>
+             <Button type="submit" isLoading={isProcessing}>Publish Update</Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

@@ -62,6 +62,16 @@ export interface Document {
   notes?: string;
 }
 
+export interface Policy {
+  id: string;
+  title: string;
+  content: string; // Summary
+  version: string;
+  dateUpdated: string;
+  category: 'HR' | 'IT' | 'General' | 'Safety';
+  uploadedBy: string;
+}
+
 export interface Notification {
   id: string;
   title: string;

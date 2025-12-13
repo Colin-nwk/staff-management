@@ -13,7 +13,8 @@ import {
   UserCircle,
   MessageSquare,
   Moon,
-  Sun
+  Sun,
+  BookOpen
 } from 'lucide-react';
 import { User } from '../types';
 import { cn } from './ui/Components';
@@ -124,6 +125,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
             </div>
             
             <NavigationItem to="/" icon={LayoutDashboard} label="Dashboard" onClick={() => setIsSidebarOpen(false)} />
+            <NavigationItem to="/policies" icon={BookOpen} label="Policies" onClick={() => setIsSidebarOpen(false)} />
             <NavigationItem to="/profile" icon={UserCircle} label="My Profile" onClick={() => setIsSidebarOpen(false)} />
             <NavigationItem to="/complaints" icon={MessageSquare} label="Help Desk" onClick={() => setIsSidebarOpen(false)} />
             
@@ -144,7 +146,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
               </>
             )}
 
-            <NavigationItem to="/documents" icon={FileText} label="Documents" onClick={() => setIsSidebarOpen(false)} />
+            <NavigationItem to="/documents" icon={FileText} label="My Documents" onClick={() => setIsSidebarOpen(false)} />
 
             {user.role === 'admin' && (
               <>

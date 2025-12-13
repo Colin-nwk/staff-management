@@ -1,4 +1,4 @@
-import { User, Document, Notification } from './types';
+import { User, Document, Notification, Policy } from './types';
 import { Users, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 
 export const MOCK_USERS: User[] = [
@@ -139,6 +139,45 @@ export const MOCK_DOCUMENTS: Document[] = [
     version: 1,
     history: [],
     notes: 'SHRM Certification'
+  }
+];
+
+export const MOCK_POLICIES: Policy[] = [
+  {
+    id: 'p1',
+    title: 'Employee Handbook 2024',
+    content: 'Comprehensive guide to company procedures, code of conduct, and benefits.',
+    version: '2.0',
+    dateUpdated: '2024-01-10',
+    category: 'General',
+    uploadedBy: 'Marcus Reynolds'
+  },
+  {
+    id: 'p2',
+    title: 'Remote Work Policy',
+    content: 'Guidelines for working from home, including hours, communication expectations, and equipment.',
+    version: '1.5',
+    dateUpdated: '2024-03-15',
+    category: 'HR',
+    uploadedBy: 'Marcus Reynolds'
+  },
+  {
+    id: 'p3',
+    title: 'IT Security Protocols',
+    content: 'Required security measures for all company devices and data handling.',
+    version: '3.1',
+    dateUpdated: '2023-11-20',
+    category: 'IT',
+    uploadedBy: 'Evelyn Vance'
+  },
+  {
+    id: 'p4',
+    title: 'Health & Safety Guidelines',
+    content: 'Emergency procedures and workplace safety standards.',
+    version: '1.0',
+    dateUpdated: '2023-09-05',
+    category: 'Safety',
+    uploadedBy: 'Marcus Reynolds'
   }
 ];
 

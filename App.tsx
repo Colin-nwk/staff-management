@@ -1,8 +1,8 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout';
-import { MOCK_USERS, MOCK_NOTIFICATIONS, MOCK_DOCUMENTS } from './constants';
-import { User, Role, ApprovalItem, Complaint, Message, Notification, Document } from './types';
+import { MOCK_USERS, MOCK_NOTIFICATIONS, MOCK_DOCUMENTS, MOCK_POLICIES } from './constants';
+import { User, Role, ApprovalItem, Complaint, Message, Notification, Document, Policy } from './types';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -14,6 +14,7 @@ import Approvals from './pages/Approvals';
 import Settings from './pages/Settings';
 import BioData from './pages/BioData';
 import Complaints from './pages/Complaints';
+import Policies from './pages/Policies';
 
 // --- Theme Context ---
 type Theme = 'light' | 'dark';
@@ -77,6 +78,20 @@ const DocumentContext = createContext<DocumentContextType | undefined>(undefined
 export const useDocuments = () => {
   const context = useContext(DocumentContext);
   if (!context) throw new Error('useDocuments must be used within a DocumentProvider');
+  return context;
+};
+
+// --- Policy Context ---
+interface PolicyContextType {
+  policies: Policy[];
+  addPolicy: (policy: Policy) => void;
+}
+
+const PolicyContext = createContext<PolicyContextType | undefined>(undefined);
+
+export const usePolicies = () => {
+  const context = useContext(PolicyContext);
+  if (!context) throw new Error('usePolicies must be used within a PolicyProvider');
   return context;
 };
 
@@ -171,6 +186,14 @@ const AppContent = () => {
           </Layout>
         </ProtectedRoute>
       } />
+      
+      <Route path="/policies" element={
+        <ProtectedRoute>
+          <Layout user={user!} onLogout={logout} pendingApprovals={pendingCount}>
+            <Policies />
+          </Layout>
+        </ProtectedRoute>
+      } />
 
       <Route path="/complaints" element={
         <ProtectedRoute>
@@ -243,6 +266,13 @@ export default function App() {
 
   const updateDocumentStatus = (id: string, status: 'approved' | 'rejected') => {
     setDocuments(prev => prev.map(d => d.id === id ? { ...d, status } : d));
+  };
+
+  // Policy State
+  const [policies, setPolicies] = useState<Policy[]>(MOCK_POLICIES);
+
+  const addPolicy = (policy: Policy) => {
+    setPolicies(prev => [policy, ...prev]);
   };
 
   // Approval State
@@ -473,13 +503,15 @@ export default function App() {
       <AuthContext.Provider value={{ user, login, logout, isLoading }}>
         <NotificationContext.Provider value={{ notifications: userNotifications, unreadCount, addNotification, markAsRead, markAllAsRead }}>
           <DocumentContext.Provider value={{ documents, addDocument, updateDocument, updateDocumentStatus }}>
-            <ApprovalContext.Provider value={{ approvals, addApproval, processApproval }}>
-              <ComplaintContext.Provider value={{ complaints, createComplaint, sendMessage, updateStatus }}>
-                <Router>
-                  <AppContent />
-                </Router>
-              </ComplaintContext.Provider>
-            </ApprovalContext.Provider>
+            <PolicyContext.Provider value={{ policies, addPolicy }}>
+              <ApprovalContext.Provider value={{ approvals, addApproval, processApproval }}>
+                <ComplaintContext.Provider value={{ complaints, createComplaint, sendMessage, updateStatus }}>
+                  <Router>
+                    <AppContent />
+                  </Router>
+                </ComplaintContext.Provider>
+              </ApprovalContext.Provider>
+            </PolicyContext.Provider>
           </DocumentContext.Provider>
         </NotificationContext.Provider>
       </AuthContext.Provider>
