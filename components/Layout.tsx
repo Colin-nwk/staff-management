@@ -14,7 +14,11 @@ import {
   MessageSquare,
   Moon,
   Sun,
-  BookOpen
+  BookOpen,
+  Search,
+  ChevronDown,
+  HelpCircle,
+  CreditCard
 } from 'lucide-react';
 import { User } from '../types';
 import { cn } from './ui/Components';
@@ -33,21 +37,26 @@ const NavigationItem = ({ to, icon: Icon, label, onClick, badge }: { to: string;
     onClick={onClick}
     className={({ isActive }) =>
       cn(
-        "flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200",
+        "flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group relative overflow-hidden",
         isActive
-          ? "bg-navy-800 text-gold-400 shadow-lg shadow-navy-900/20"
-          : "text-slate-300 hover:bg-navy-800/50 hover:text-white"
+          ? "bg-navy-800 text-gold-400 shadow-md shadow-navy-900/10"
+          : "text-slate-400 hover:bg-navy-800/50 hover:text-slate-200"
       )
     }
   >
-    <div className="flex items-center gap-3">
-      <Icon className="w-5 h-5" />
-      <span>{label}</span>
-    </div>
-    {badge !== undefined && badge > 0 && (
-      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold-500 text-[10px] font-bold text-white">
-        {badge > 99 ? '99+' : badge}
-      </span>
+    {({ isActive }) => (
+      <>
+        <div className="flex items-center gap-3 relative z-10">
+          <Icon className={cn("w-5 h-5 transition-colors", isActive ? "text-gold-500" : "text-slate-500 group-hover:text-slate-300")} />
+          <span>{label}</span>
+        </div>
+        {badge !== undefined && badge > 0 && (
+          <span className="flex h-5 min-w-[1.25rem] px-1 items-center justify-center rounded-full bg-gold-500 text-[10px] font-bold text-navy-900 relative z-10">
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
+        {isActive && <div className="absolute inset-y-0 left-0 w-1 bg-gold-500 rounded-r-full" />}
+      </>
     )}
   </NavLink>
 );
@@ -55,7 +64,11 @@ const NavigationItem = ({ to, icon: Icon, label, onClick, badge }: { to: string;
 export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendingApprovals = 0 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  
   const notificationRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { theme, toggleTheme } = useTheme();
@@ -68,28 +81,42 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
   const getPageTitle = () => {
     const path = location.pathname.substring(1);
     if (!path) return 'Dashboard';
-    // Handle nested paths like staff/create
     const mainSection = path.split('/')[0];
-    return mainSection.charAt(0).toUpperCase() + mainSection.slice(1);
+    return mainSection.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
-  // Close notifications on click outside
+  // Close menus on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
         setIsNotificationsOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Keyboard shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-navy-950 flex transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-navy-950 flex transition-colors duration-200 font-sans">
       {/* Mobile Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-navy-900/50 z-40 lg:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-navy-950/80 z-40 lg:hidden backdrop-blur-sm transition-opacity"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -97,42 +124,42 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
       {/* Sidebar */}
       <aside 
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-navy-900 text-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto lg:h-auto shadow-2xl",
+          "fixed inset-y-0 left-0 z-50 w-72 bg-navy-900 text-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto lg:h-auto border-r border-navy-800 shadow-2xl",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="h-20 flex items-center px-8 border-b border-navy-800">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-navy-900 font-serif font-bold text-xl">
+          <div className="h-16 flex items-center px-6 border-b border-navy-800">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-navy-950 font-serif font-bold text-xl shadow-lg shadow-gold-500/20">
                 N
               </div>
-              <span className="font-serif text-2xl font-semibold tracking-tight">Nexus</span>
+              <span className="font-serif text-2xl font-medium tracking-tight text-slate-100">Nexus</span>
             </div>
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="ml-auto lg:hidden text-slate-400 hover:text-white"
+              className="ml-auto lg:hidden text-slate-400 hover:text-white p-1"
             >
               <X className="w-6 h-6" />
             </button>
           </div>
 
           {/* Nav Links */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <div className="mb-6 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-hide">
+            <div className="mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans">
               Main Menu
             </div>
             
             <NavigationItem to="/" icon={LayoutDashboard} label="Dashboard" onClick={() => setIsSidebarOpen(false)} />
             <NavigationItem to="/policies" icon={BookOpen} label="Policies" onClick={() => setIsSidebarOpen(false)} />
-            <NavigationItem to="/profile" icon={UserCircle} label="My Profile" onClick={() => setIsSidebarOpen(false)} />
+            <NavigationItem to="/documents" icon={FileText} label="Documents" onClick={() => setIsSidebarOpen(false)} />
             <NavigationItem to="/complaints" icon={MessageSquare} label="Help Desk" onClick={() => setIsSidebarOpen(false)} />
             
             {/* Role Based Links */}
             {(user.role === 'hr' || user.role === 'admin') && (
               <>
-                 <div className="mt-8 mb-4 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                 <div className="mt-8 mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans">
                   Management
                 </div>
                 <NavigationItem to="/staff" icon={Users} label="Staff Directory" onClick={() => setIsSidebarOpen(false)} />
@@ -146,88 +173,107 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
               </>
             )}
 
-            <NavigationItem to="/documents" icon={FileText} label="My Documents" onClick={() => setIsSidebarOpen(false)} />
-
             {user.role === 'admin' && (
               <>
-                 <div className="mt-8 mb-4 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                 <div className="mt-8 mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans">
                   System
                 </div>
                 <NavigationItem to="/settings" icon={Settings} label="Settings" onClick={() => setIsSidebarOpen(false)} />
               </>
             )}
           </nav>
-
-          {/* User Profile Footer */}
-          <div className="p-4 border-t border-navy-800">
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-navy-800/50 mb-3">
-              <img 
-                src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=fbbf24&color=0f172a`} 
-                alt="Profile" 
-                className="w-10 h-10 rounded-full border-2 border-navy-700"
-              />
-              <div className="overflow-hidden">
-                <p className="text-sm font-medium text-white truncate">{user.firstName} {user.lastName}</p>
-                <p className="text-xs text-slate-400 truncate capitalize">{user.role}</p>
-              </div>
-            </div>
-            <button 
-              onClick={onLogout}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-navy-800 rounded-lg transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </button>
-          </div>
+          
+          {/* Mobile Logout (only shown on mobile sidebar) */}
+           <div className="p-4 border-t border-navy-800 lg:hidden">
+              <button 
+                onClick={onLogout}
+                className="flex items-center gap-3 w-full px-4 py-2 text-sm font-medium text-red-400 hover:text-red-300 hover:bg-navy-800 rounded-lg transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                Sign Out
+              </button>
+           </div>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Header */}
-        <header className="h-20 bg-white dark:bg-navy-900 border-b border-slate-200 dark:border-navy-800 sticky top-0 z-30 px-4 sm:px-8 flex items-center justify-between transition-colors duration-200">
-          <div className="flex items-center gap-4">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
+        
+        {/* Modern Top Header */}
+        <header className="h-16 px-4 sm:px-6 bg-white/80 dark:bg-navy-950/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-navy-800 sticky top-0 z-30 flex items-center justify-between gap-4 transition-all duration-200 supports-[backdrop-filter]:bg-white/60">
+          
+          {/* Left: Mobile Toggle & Title */}
+          <div className="flex items-center gap-4 lg:gap-8 min-w-0">
             <button 
               onClick={toggleSidebar}
-              className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-navy-800 rounded-lg lg:hidden"
+              className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-navy-800 rounded-lg lg:hidden transition-colors"
             >
               <Menu className="w-6 h-6" />
             </button>
-            <h1 className="text-2xl font-serif font-medium text-navy-900 dark:text-white hidden sm:block">
+            
+            <h1 className="text-lg font-semibold text-navy-900 dark:text-white truncate hidden sm:block">
               {getPageTitle()}
             </h1>
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* Center: Global Search Bar */}
+          <div className="hidden md:flex items-center max-w-md w-full relative group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-slate-400 group-focus-within:text-gold-500 transition-colors" />
+            </div>
+            <input
+              ref={searchInputRef}
+              type="text"
+              className="block w-full pl-10 pr-10 py-2 border border-slate-200 dark:border-navy-700 rounded-xl leading-5 bg-slate-50 dark:bg-navy-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-gold-500/50 focus:border-gold-500 focus:bg-white dark:focus:bg-navy-800 sm:text-sm transition-all duration-200"
+              placeholder="Search..."
+            />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <span className="text-slate-400 text-xs font-mono bg-white dark:bg-navy-800 border border-slate-200 dark:border-navy-600 rounded px-1.5 py-0.5 shadow-sm">⌘K</span>
+            </div>
+          </div>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            
+            {/* Search Icon (Mobile) */}
+            <button className="md:hidden p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-navy-800 rounded-full transition-colors">
+               <Search className="w-5 h-5" />
+            </button>
+
             {/* Theme Toggle */}
             <button 
                 onClick={toggleTheme}
-                className="p-2 text-slate-400 hover:text-gold-500 transition-colors focus:outline-none rounded-lg hover:bg-slate-50 dark:hover:bg-navy-800"
+                className="p-2 text-slate-500 hover:text-gold-600 dark:text-slate-400 dark:hover:text-gold-400 hover:bg-gold-50 dark:hover:bg-navy-800 rounded-full transition-all duration-200"
                 aria-label="Toggle Theme"
             >
                 {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </button>
 
-            {/* Notification Bell */}
+            {/* Notifications */}
             <div className="relative" ref={notificationRef}>
                 <button 
-                  className="relative p-2 text-slate-400 hover:text-navy-900 dark:hover:text-white transition-colors focus:outline-none"
+                  className={cn(
+                    "relative p-2 rounded-full transition-all duration-200",
+                    isNotificationsOpen 
+                      ? "bg-gold-50 text-gold-600 dark:bg-navy-800 dark:text-gold-400" 
+                      : "text-slate-500 hover:bg-slate-100 hover:text-navy-900 dark:text-slate-400 dark:hover:bg-navy-800 dark:hover:text-white"
+                  )}
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
                 >
-                  <Bell className="w-6 h-6" />
+                  <Bell className="w-5 h-5" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-navy-900 animate-pulse"></span>
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-navy-950 animate-pulse"></span>
                   )}
                 </button>
 
                 {isNotificationsOpen && (
-                    <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-navy-800 rounded-xl shadow-2xl border border-slate-100 dark:border-navy-700 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <div className="p-4 border-b border-slate-50 dark:border-navy-700 flex justify-between items-center bg-slate-50/50 dark:bg-navy-800">
-                            <h3 className="font-medium text-navy-900 dark:text-white">Notifications</h3>
+                    <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white dark:bg-navy-800 rounded-2xl shadow-xl shadow-navy-900/10 border border-slate-100 dark:border-navy-700 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                        <div className="p-4 border-b border-slate-50 dark:border-navy-700 flex justify-between items-center bg-slate-50/50 dark:bg-navy-800/50 backdrop-blur-sm">
+                            <h3 className="font-semibold text-navy-900 dark:text-white">Notifications</h3>
                             {unreadCount > 0 && (
                                 <button 
                                   onClick={markAllAsRead}
-                                  className="text-xs text-gold-600 hover:text-gold-700 dark:text-gold-500 dark:hover:text-gold-400 font-medium"
+                                  className="text-xs text-gold-600 hover:text-gold-700 dark:text-gold-500 dark:hover:text-gold-400 font-medium px-2 py-1 rounded hover:bg-gold-50 dark:hover:bg-navy-700 transition-colors"
                                 >
                                     Mark all read
                                 </button>
@@ -235,9 +281,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
                         </div>
                         <div className="max-h-[400px] overflow-y-auto">
                             {notifications.length === 0 ? (
-                                <div className="p-8 text-center text-slate-400 dark:text-slate-500">
-                                    <Bell className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                                    <p className="text-sm">No notifications yet</p>
+                                <div className="p-8 text-center text-slate-400 dark:text-slate-500 flex flex-col items-center">
+                                    <div className="w-12 h-12 bg-slate-50 dark:bg-navy-700 rounded-full flex items-center justify-center mb-3">
+                                        <Bell className="w-6 h-6 opacity-40" />
+                                    </div>
+                                    <p className="text-sm font-medium">All caught up!</p>
+                                    <p className="text-xs mt-1">No new notifications to show.</p>
                                 </div>
                             ) : (
                                 <div className="divide-y divide-slate-50 dark:divide-navy-700">
@@ -245,40 +294,109 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
                                         <div 
                                           key={notification.id} 
                                           onClick={() => markAsRead(notification.id)}
-                                          className={`p-4 hover:bg-slate-50 dark:hover:bg-navy-700 transition-colors cursor-pointer flex gap-3 ${!notification.read ? 'bg-blue-50/30 dark:bg-navy-700/50' : ''}`}
+                                          className={`p-4 hover:bg-slate-50 dark:hover:bg-navy-700/50 transition-colors cursor-pointer flex gap-3 ${!notification.read ? 'bg-blue-50/30 dark:bg-navy-700/30' : ''}`}
                                         >
-                                            <div className={`w-2 h-2 mt-2 rounded-full flex-shrink-0 ${!notification.read ? 'bg-gold-500' : 'bg-transparent'}`}></div>
-                                            <div className="flex-1">
-                                                <div className="flex justify-between items-start mb-1">
-                                                    <p className={`text-sm ${!notification.read ? 'font-semibold text-navy-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
+                                            <div className={cn(
+                                                "w-2 h-2 mt-2 rounded-full flex-shrink-0 transition-colors",
+                                                !notification.read ? "bg-gold-500 shadow-sm shadow-gold-500/50" : "bg-slate-200 dark:bg-navy-600"
+                                            )}></div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex justify-between items-start mb-0.5">
+                                                    <p className={cn(
+                                                        "text-sm truncate pr-2",
+                                                        !notification.read ? "font-semibold text-navy-900 dark:text-white" : "text-slate-700 dark:text-slate-300"
+                                                    )}>
                                                         {notification.title}
                                                     </p>
-                                                    <span className="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap ml-2">{notification.date}</span>
+                                                    <span className="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap flex-shrink-0">{notification.date}</span>
                                                 </div>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{notification.message}</p>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{notification.message}</p>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </div>
-                        <div className="p-2 border-t border-slate-50 dark:border-navy-700 bg-slate-50/30 dark:bg-navy-800 text-center">
-                            <button className="text-xs text-slate-500 dark:text-slate-400 hover:text-navy-900 dark:hover:text-white font-medium">View All History</button>
-                        </div>
                     </div>
                 )}
             </div>
 
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-navy-800 rounded-full">
-              <span className={`w-2 h-2 rounded-full ${user.status === 'active' ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-300 capitalize">{user.status}</span>
+            {/* Separator */}
+            <div className="h-6 w-px bg-slate-200 dark:bg-navy-700 hidden sm:block"></div>
+
+            {/* User Profile Dropdown */}
+            <div className="relative" ref={userMenuRef}>
+               <button
+                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                 className="flex items-center gap-3 pl-1 pr-2 py-1 rounded-full hover:bg-slate-100 dark:hover:bg-navy-800 border border-transparent hover:border-slate-200 dark:hover:border-navy-700 transition-all duration-200 group"
+               >
+                 <div className="relative">
+                    <img 
+                        src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=fbbf24&color=0f172a`} 
+                        alt="Profile" 
+                        className="w-8 h-8 rounded-full border-2 border-white dark:border-navy-700 shadow-sm object-cover group-hover:scale-105 transition-transform"
+                    />
+                    <span className={cn(
+                        "absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-navy-900",
+                        user.status === 'active' ? "bg-emerald-500" : "bg-amber-500"
+                    )}></span>
+                 </div>
+                 
+                 <div className="hidden md:flex flex-col items-start">
+                    <span className="text-sm font-semibold text-navy-900 dark:text-white leading-none">{user.firstName}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium capitalize mt-0.5">{user.role}</span>
+                 </div>
+                 <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform duration-200 hidden md:block", isUserMenuOpen ? "rotate-180" : "")} />
+               </button>
+
+               {/* Dropdown Menu */}
+               {isUserMenuOpen && (
+                 <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-navy-800 rounded-xl shadow-xl shadow-navy-900/10 border border-slate-100 dark:border-navy-700 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                    <div className="p-4 border-b border-slate-100 dark:border-navy-700 bg-slate-50/50 dark:bg-navy-900/50">
+                        <p className="text-sm font-bold text-navy-900 dark:text-white">{user.firstName} {user.lastName}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
+                    </div>
+                    <div className="p-2 space-y-1">
+                        <button 
+                            onClick={() => { navigate('/profile'); setIsUserMenuOpen(false); }}
+                            className="flex w-full items-center gap-3 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-navy-700/50 rounded-lg transition-colors"
+                        >
+                            <UserCircle className="w-4 h-4" /> My Profile
+                        </button>
+                         <button 
+                            onClick={() => { navigate('/settings'); setIsUserMenuOpen(false); }}
+                            className="flex w-full items-center gap-3 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-navy-700/50 rounded-lg transition-colors"
+                        >
+                            <Settings className="w-4 h-4" /> Settings
+                        </button>
+                        <button 
+                            className="flex w-full items-center gap-3 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-navy-700/50 rounded-lg transition-colors"
+                        >
+                            <CreditCard className="w-4 h-4" /> Billing
+                        </button>
+                        <div className="h-px bg-slate-100 dark:bg-navy-700 my-1 mx-2"></div>
+                         <button 
+                            className="flex w-full items-center gap-3 px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-navy-700/50 rounded-lg transition-colors"
+                        >
+                            <HelpCircle className="w-4 h-4" /> Help Center
+                        </button>
+                         <button 
+                            onClick={onLogout}
+                            className="flex w-full items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors"
+                        >
+                            <LogOut className="w-4 h-4" /> Sign Out
+                        </button>
+                    </div>
+                 </div>
+               )}
             </div>
+
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-8 overflow-y-auto">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto overflow-x-hidden">
+          <div className="max-w-7xl mx-auto w-full animate-in fade-in duration-500">
             {children}
           </div>
         </main>
