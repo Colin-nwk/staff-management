@@ -18,7 +18,9 @@ import {
   Search,
   ChevronDown,
   HelpCircle,
-  CreditCard
+  CreditCard,
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react';
 import { User } from '../types';
 import { cn } from './ui/Components';
@@ -31,13 +33,29 @@ interface LayoutProps {
   pendingApprovals?: number;
 }
 
-const NavigationItem = ({ to, icon: Icon, label, onClick, badge }: { to: string; icon: React.ElementType; label: string; onClick?: () => void; badge?: number }) => (
+const NavigationItem = ({ 
+  to, 
+  icon: Icon, 
+  label, 
+  onClick, 
+  badge,
+  isCollapsed 
+}: { 
+  to: string; 
+  icon: React.ElementType; 
+  label: string; 
+  onClick?: () => void; 
+  badge?: number;
+  isCollapsed: boolean;
+}) => (
   <NavLink
     to={to}
     onClick={onClick}
+    title={isCollapsed ? label : undefined}
     className={({ isActive }) =>
       cn(
-        "flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group relative overflow-hidden",
+        "flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 group relative overflow-hidden",
+        isCollapsed ? "justify-center" : "justify-between",
         isActive
           ? "bg-navy-800 text-gold-400 shadow-md shadow-navy-900/10"
           : "text-slate-400 hover:bg-navy-800/50 hover:text-slate-200"
@@ -46,14 +64,17 @@ const NavigationItem = ({ to, icon: Icon, label, onClick, badge }: { to: string;
   >
     {({ isActive }) => (
       <>
-        <div className="flex items-center gap-3 relative z-10">
-          <Icon className={cn("w-5 h-5 transition-colors", isActive ? "text-gold-500" : "text-slate-500 group-hover:text-slate-300")} />
-          <span>{label}</span>
+        <div className={cn("flex items-center gap-3 relative z-10", isCollapsed && "justify-center")}>
+          <Icon className={cn("w-5 h-5 transition-colors flex-shrink-0", isActive ? "text-gold-500" : "text-slate-500 group-hover:text-slate-300")} />
+          {!isCollapsed && <span className="whitespace-nowrap">{label}</span>}
         </div>
-        {badge !== undefined && badge > 0 && (
+        {!isCollapsed && badge !== undefined && badge > 0 && (
           <span className="flex h-5 min-w-[1.25rem] px-1 items-center justify-center rounded-full bg-gold-500 text-[10px] font-bold text-navy-900 relative z-10">
             {badge > 99 ? '99+' : badge}
           </span>
+        )}
+        {isCollapsed && badge !== undefined && badge > 0 && (
+           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-gold-500 rounded-full"></span>
         )}
         {isActive && <div className="absolute inset-y-0 left-0 w-1 bg-gold-500 rounded-r-full" />}
       </>
@@ -63,6 +84,7 @@ const NavigationItem = ({ to, icon: Icon, label, onClick, badge }: { to: string;
 
 export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendingApprovals = 0 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   
@@ -77,6 +99,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
   const location = useLocation();
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleCollapse = () => setIsCollapsed(!isCollapsed);
 
   const getPageTitle = () => {
     const path = location.pathname.substring(1);
@@ -124,76 +147,99 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
       {/* Sidebar */}
       <aside 
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 bg-navy-900 text-white transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto lg:h-auto border-r border-navy-800 shadow-2xl",
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-y-0 left-0 z-50 bg-navy-900 text-white transform transition-all duration-300 ease-in-out border-r border-navy-800 shadow-2xl flex flex-col",
+          // Mobile vs Desktop widths and visibility
+          isSidebarOpen ? "translate-x-0 w-72" : "-translate-x-full lg:translate-x-0",
+          "lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:scrollbar-hide", // Changed to sticky h-screen
+          isCollapsed ? "lg:w-20" : "lg:w-72" 
         )}
       >
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="h-16 flex items-center px-6 border-b border-navy-800">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-navy-950 font-serif font-bold text-xl shadow-lg shadow-gold-500/20">
-                N
-              </div>
-              <span className="font-serif text-2xl font-medium tracking-tight text-slate-100">Nexus</span>
+        {/* Logo Area */}
+        <div className={cn("h-16 flex items-center border-b border-navy-800 transition-all duration-300 flex-shrink-0", isCollapsed ? "justify-center px-0" : "px-6 justify-between")}>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-navy-950 font-serif font-bold text-xl shadow-lg shadow-gold-500/20 flex-shrink-0">
+              N
             </div>
-            <button 
-              onClick={() => setIsSidebarOpen(false)}
-              className="ml-auto lg:hidden text-slate-400 hover:text-white p-1"
-            >
-              <X className="w-6 h-6" />
-            </button>
+            {!isCollapsed && (
+               <span className="font-serif text-2xl font-medium tracking-tight text-slate-100 whitespace-nowrap overflow-hidden transition-all duration-300">Nexus</span>
+            )}
           </div>
-
-          {/* Nav Links */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-hide">
-            <div className="mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans">
-              Main Menu
-            </div>
-            
-            <NavigationItem to="/" icon={LayoutDashboard} label="Dashboard" onClick={() => setIsSidebarOpen(false)} />
-            <NavigationItem to="/policies" icon={BookOpen} label="Policies" onClick={() => setIsSidebarOpen(false)} />
-            <NavigationItem to="/documents" icon={FileText} label="Documents" onClick={() => setIsSidebarOpen(false)} />
-            <NavigationItem to="/complaints" icon={MessageSquare} label="Help Desk" onClick={() => setIsSidebarOpen(false)} />
-            
-            {/* Role Based Links */}
-            {(user.role === 'hr' || user.role === 'admin') && (
-              <>
-                 <div className="mt-8 mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans">
-                  Management
-                </div>
-                <NavigationItem to="/staff" icon={Users} label="Staff Directory" onClick={() => setIsSidebarOpen(false)} />
-                <NavigationItem 
-                  to="/approvals" 
-                  icon={CheckSquare} 
-                  label="Approvals" 
-                  badge={pendingApprovals}
-                  onClick={() => setIsSidebarOpen(false)} 
-                />
-              </>
-            )}
-
-            {user.role === 'admin' && (
-              <>
-                 <div className="mt-8 mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans">
-                  System
-                </div>
-                <NavigationItem to="/settings" icon={Settings} label="Settings" onClick={() => setIsSidebarOpen(false)} />
-              </>
-            )}
-          </nav>
-          
-          {/* Mobile Logout (only shown on mobile sidebar) */}
-           <div className="p-4 border-t border-navy-800 lg:hidden">
-              <button 
-                onClick={onLogout}
-                className="flex items-center gap-3 w-full px-4 py-2 text-sm font-medium text-red-400 hover:text-red-300 hover:bg-navy-800 rounded-lg transition-colors"
-              >
-                <LogOut className="w-5 h-5" />
-                Sign Out
-              </button>
-           </div>
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="lg:hidden text-slate-400 hover:text-white p-1"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
+
+        {/* Nav Links */}
+        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-hide">
+          {!isCollapsed && (
+             <div className="mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans transition-opacity duration-300">
+               Main Menu
+             </div>
+          )}
+          
+          <NavigationItem to="/" icon={LayoutDashboard} label="Dashboard" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
+          <NavigationItem to="/policies" icon={BookOpen} label="Policies" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
+          <NavigationItem to="/documents" icon={FileText} label="Documents" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
+          <NavigationItem to="/complaints" icon={MessageSquare} label="Help Desk" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
+          
+          {/* Role Based Links */}
+          {(user.role === 'hr' || user.role === 'admin') && (
+            <>
+               {!isCollapsed && (
+                  <div className="mt-8 mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans animate-in fade-in">
+                    Management
+                  </div>
+               )}
+               {isCollapsed && <div className="h-4"></div>}
+               <NavigationItem to="/staff" icon={Users} label="Staff Directory" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
+               <NavigationItem 
+                 to="/approvals" 
+                 icon={CheckSquare} 
+                 label="Approvals" 
+                 badge={pendingApprovals}
+                 onClick={() => setIsSidebarOpen(false)} 
+                 isCollapsed={isCollapsed}
+               />
+            </>
+          )}
+
+          {user.role === 'admin' && (
+            <>
+               {!isCollapsed && (
+                  <div className="mt-8 mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans animate-in fade-in">
+                    System
+                  </div>
+               )}
+               {isCollapsed && <div className="h-4"></div>}
+               <NavigationItem to="/settings" icon={Settings} label="Settings" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
+            </>
+          )}
+        </nav>
+        
+        {/* Sidebar Footer / Collapse Toggle */}
+        <div className="p-4 border-t border-navy-800 hidden lg:flex justify-center flex-shrink-0">
+             <button 
+                onClick={toggleCollapse}
+                className="p-2 text-slate-500 hover:text-white hover:bg-navy-800 rounded-lg transition-colors"
+                title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+             >
+                {isCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
+             </button>
+        </div>
+
+        {/* Mobile Logout */}
+         <div className="p-4 border-t border-navy-800 lg:hidden flex-shrink-0">
+            <button 
+              onClick={onLogout}
+              className="flex items-center gap-3 w-full px-4 py-2 text-sm font-medium text-red-400 hover:text-red-300 hover:bg-navy-800 rounded-lg transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              Sign Out
+            </button>
+         </div>
       </aside>
 
       {/* Main Content Area */}

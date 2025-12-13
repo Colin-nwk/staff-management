@@ -28,7 +28,7 @@ export const Button: React.FC<ButtonProps> = ({
   const variants = {
     primary: 'bg-navy-900 text-white hover:bg-navy-800 dark:bg-gold-500 dark:text-navy-950 dark:hover:bg-gold-400 shadow-md shadow-navy-900/10',
     secondary: 'bg-gold-500 text-white hover:bg-gold-600 focus:ring-gold-500 shadow-sm dark:bg-navy-700 dark:text-white dark:hover:bg-navy-600',
-    outline: 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 focus:ring-slate-200 dark:bg-transparent dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800',
+    outline: 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 focus:ring-slate-200 dark:bg-transparent dark:border-navy-600 dark:text-slate-200 dark:hover:bg-navy-800',
     ghost: 'text-slate-600 hover:bg-slate-100 hover:text-navy-900 dark:text-slate-400 dark:hover:bg-navy-800 dark:hover:text-white',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-600'
   };
@@ -65,7 +65,7 @@ export const Card: React.FC<CardProps> = ({ className, children, noPadding = fal
   return (
     <div 
       className={cn(
-        "bg-white dark:bg-navy-800 rounded-xl border border-slate-100 dark:border-navy-700 shadow-sm hover:shadow-md transition-shadow duration-300", 
+        "bg-white dark:bg-navy-900 rounded-xl border border-slate-100 dark:border-navy-800 shadow-sm hover:shadow-md transition-shadow duration-300", 
         !noPadding && "p-6",
         className
       )} 
@@ -93,12 +93,47 @@ export const Input: React.FC<InputProps> = ({ className, label, error, id, ...pr
       <input
         id={id}
         className={cn(
-          "flex h-10 w-full rounded-md border border-slate-300 dark:border-navy-600 bg-white dark:bg-navy-900 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-gold-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200",
+          "flex h-10 w-full rounded-md border border-slate-300 dark:border-navy-600 bg-white dark:bg-navy-950 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-gold-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200",
           error && "border-red-500 focus:ring-red-500",
           className
         )}
         {...props}
       />
+      {error && <p className="text-xs text-red-500">{error}</p>}
+    </div>
+  );
+};
+
+// --- Select ---
+interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label?: string;
+  error?: string;
+}
+
+export const Select: React.FC<SelectProps> = ({ className, label, error, id, children, ...props }) => {
+  return (
+    <div className="w-full space-y-1.5">
+      {label && (
+        <label htmlFor={id} className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+          {label}
+        </label>
+      )}
+      <div className="relative">
+        <select
+          id={id}
+          className={cn(
+            "flex h-10 w-full rounded-md border border-slate-300 dark:border-navy-600 bg-white dark:bg-navy-950 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-gold-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 appearance-none",
+            error && "border-red-500 focus:ring-red-500",
+            className
+          )}
+          {...props}
+        >
+          {children}
+        </select>
+        <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-slate-500 dark:text-slate-400">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+        </div>
+      </div>
       {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
   );
@@ -121,7 +156,7 @@ export const TextArea: React.FC<TextAreaProps> = ({ className, label, error, id,
       <textarea
         id={id}
         className={cn(
-          "flex min-h-[80px] w-full rounded-md border border-slate-300 dark:border-navy-600 bg-white dark:bg-navy-900 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-gold-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200",
+          "flex min-h-[80px] w-full rounded-md border border-slate-300 dark:border-navy-600 bg-white dark:bg-navy-950 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-gold-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200",
           error && "border-red-500 focus:ring-red-500",
           className
         )}
