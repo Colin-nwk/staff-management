@@ -159,11 +159,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
         {/* Logo Area */}
         <div className={cn("h-16 flex items-center border-b border-navy-800 transition-all duration-300 flex-shrink-0", isCollapsed ? "justify-center px-0" : "px-6 justify-between")}>
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-navy-950 font-serif font-bold text-xl shadow-lg shadow-gold-500/20 flex-shrink-0">
-              N
+            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-navy-900 font-serif font-bold text-xl shadow-lg border-2 border-gold-500 flex-shrink-0">
+              <span className="text-navy-600">N</span>
             </div>
             {!isCollapsed && (
-               <span className="font-serif text-2xl font-medium tracking-tight text-slate-100 whitespace-nowrap overflow-hidden transition-all duration-300">Nexus</span>
+               <span className="font-serif text-2xl font-medium tracking-tight text-slate-100 whitespace-nowrap overflow-hidden transition-all duration-300">NCoS</span>
             )}
           </Link>
           <button 
@@ -177,7 +177,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
         {/* Nav Links */}
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-hide">
           {!isCollapsed && (
-             <div className="mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans transition-opacity duration-300">
+             <div className="mb-4 px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest font-sans transition-opacity duration-300">
                Staff Module
              </div>
           )}
@@ -191,7 +191,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
           {(user.role === 'hr' || user.role === 'admin') && (
             <>
                {!isCollapsed && (
-                  <div className="mt-8 mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans animate-in fade-in">
+                  <div className="mt-8 mb-4 px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest font-sans animate-in fade-in">
                     Management
                   </div>
                )}
@@ -211,7 +211,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
           {user.role === 'admin' && (
             <>
                {!isCollapsed && (
-                  <div className="mt-8 mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans animate-in fade-in">
+                  <div className="mt-8 mb-4 px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest font-sans animate-in fade-in">
                     System
                   </div>
                )}
@@ -222,7 +222,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
 
            {/* App Switcher */}
             {!isCollapsed && (
-                  <div className="mt-8 mb-4 px-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans animate-in fade-in">
+                  <div className="mt-8 mb-4 px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest font-sans animate-in fade-in">
                     Navigation
                   </div>
             )}

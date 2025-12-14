@@ -46,8 +46,8 @@ const Settings = () => {
           {activeSection === 'general' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Input label="Company Name" defaultValue="Nexus Inc." />
-                <Input label="Support Email" defaultValue="support@nexus.com" />
+                <Input label="Organization Name" defaultValue="Nigerian Correctional Service" />
+                <Input label="Support Email" defaultValue="support@correctionalservice.gov.ng" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">System Maintenance Mode</label>

@@ -50,10 +50,10 @@ const Modules = () => {
       {/* Header */}
       <div className="max-w-6xl mx-auto flex justify-between items-center mb-12 animate-in fade-in slide-in-from-top-4 duration-500">
          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-navy-950 font-serif font-bold text-2xl shadow-lg shadow-gold-500/20">
+            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-navy-900 font-serif font-bold text-2xl shadow-lg border-2 border-gold-500">
               N
             </div>
-            <span className="font-serif text-2xl font-medium tracking-tight text-navy-900 dark:text-white">Nexus</span>
+            <span className="font-serif text-2xl font-medium tracking-tight text-navy-900 dark:text-white">Nigerian Correctional Service</span>
          </div>
          <div className="flex items-center gap-4">
              {user && (
@@ -87,7 +87,7 @@ const Modules = () => {
               title="Staff Management" 
               description="Complete employee directory, leave management, document handling, and policy center."
               icon={Users}
-              color="bg-blue-600"
+              color="bg-navy-600"
               active={true}
               onClick={() => navigate('/staff-dashboard')}
             />

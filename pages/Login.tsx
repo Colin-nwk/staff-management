@@ -34,23 +34,23 @@ const Login = () => {
       {/* Abstract Background Shapes */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-20">
          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-gold-500 blur-3xl"></div>
-         <div className="absolute top-1/2 -left-24 w-72 h-72 rounded-full bg-blue-600 blur-3xl"></div>
+         <div className="absolute top-1/2 -left-24 w-72 h-72 rounded-full bg-navy-600 blur-3xl"></div>
       </div>
 
       <Card className="w-full max-w-md relative z-10 backdrop-blur-md bg-white/95 dark:bg-navy-900/90 border-white/20 p-8 shadow-2xl">
         <div className="text-center mb-8">
-          <div className="mx-auto w-12 h-12 bg-navy-900 dark:bg-black rounded-lg flex items-center justify-center mb-4 border border-navy-800 dark:border-navy-700">
-             <span className="text-gold-500 font-serif font-bold text-2xl">N</span>
+          <div className="mx-auto w-16 h-16 bg-white dark:bg-navy-800 rounded-xl flex items-center justify-center mb-4 border-2 border-gold-500 shadow-lg">
+             <span className="text-navy-900 dark:text-white font-serif font-bold text-3xl">N</span>
           </div>
-          <h2 className="text-3xl font-serif font-medium text-navy-900 dark:text-white">Welcome Back</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-2">Sign in to access your dashboard</p>
+          <h2 className="text-2xl font-serif font-medium text-navy-900 dark:text-white">Nigerian Correctional Service</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm uppercase tracking-wide font-medium">Staff Management System</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <Input 
             label="Email Address" 
             type="email" 
-            placeholder="you@nexus.com" 
+            placeholder="officer@correctionalservice.gov.ng" 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -82,7 +82,7 @@ const Login = () => {
 
           <Button 
             type="submit" 
-            className="w-full h-12 text-base shadow-lg shadow-navy-900/20"
+            className="w-full h-12 text-base shadow-lg shadow-navy-900/20 bg-navy-900 hover:bg-navy-800 text-white"
             isLoading={isSubmitting}
           >
             Sign In

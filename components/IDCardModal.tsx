@@ -23,7 +23,7 @@ const IDCardModal: React.FC<IDCardModalProps> = ({ isOpen, onClose, user }) => {
 VERSION:3.0
 N:${user.lastName};${user.firstName}
 FN:${user.firstName} ${user.lastName}
-ORG:Nexus Inc.
+ORG:Nigerian Correctional Service
 TITLE:${user.position}
 TEL;TYPE=CELL:${user.phone || ''}
 EMAIL:${user.email}
@@ -56,7 +56,7 @@ END:VCARD`;
         useCORS: true // Attempt to load external images
       });
       const link = document.createElement('a');
-      link.download = `Nexus_ID_${user.firstName}_${user.lastName}.png`;
+      link.download = `NCoS_ID_${user.firstName}_${user.lastName}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch (err) {
@@ -131,8 +131,8 @@ END:VCARD`;
                 <div className="flex justify-between items-start">
                    <div>
                       <div className="flex items-center gap-2 mb-1">
-                         <div className="w-6 h-6 rounded bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-navy-950 font-serif font-bold text-xs shadow-sm">N</div>
-                         <span className="font-serif text-lg font-bold tracking-tight">Nexus Inc.</span>
+                         <div className="w-6 h-6 rounded bg-gradient-to-br from-white to-slate-100 flex items-center justify-center text-navy-900 font-serif font-bold text-xs shadow-sm border border-gold-500">N</div>
+                         <span className="font-serif text-sm font-bold tracking-tight uppercase">Nigerian Correctional<br/>Service</span>
                       </div>
                    </div>
                    {/* QR Code */}
@@ -154,7 +154,7 @@ END:VCARD`;
                 <div className="space-y-1 mt-2">
                    <div className="flex justify-between items-end border-b border-white/10 pb-1">
                       <span className="text-[10px] opacity-60 uppercase">Staff ID</span>
-                      <span className="text-xs font-mono font-bold">{user.id.toUpperCase()}</span>
+                      <span className="text-xs font-mono font-bold">{user.id.toUpperCase().replace('NEX', 'NCoS')}</span>
                    </div>
                    <div className="flex justify-between items-end border-b border-white/10 pb-1">
                        <span className="text-[10px] opacity-60 uppercase">Email</span>
@@ -182,7 +182,7 @@ END:VCARD`;
         </div>
 
         <p className="text-xs text-slate-400 text-center max-w-sm">
-           This ID card is property of Nexus Inc. If found, please return to the nearest Nexus office or contact support@nexus.com.
+           This ID card is property of the Nigerian Correctional Service. If found, please return to the nearest NCoS office or contact support.
         </p>
       </div>
     </Modal>
