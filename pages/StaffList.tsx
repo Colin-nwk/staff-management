@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { MOCK_USERS } from '../constants';
 import { Card, Input, Button, Badge, Modal } from '../components/ui/Components';
-import { Search, Filter, Phone, MapPin, UserPlus, Edit2, Trash2, ChevronDown, ChevronUp, ChevronsUpDown, ChevronLeft, ChevronRight, Settings2, Download, Trash, Check, RefreshCw } from 'lucide-react';
+import { Search, Filter, Phone, MapPin, UserPlus, Edit2, Trash2, ChevronDown, ChevronUp, ChevronsUpDown, ChevronLeft, ChevronRight, Settings2, Download, Trash, Check, RefreshCw, CreditCard } from 'lucide-react';
 import { useAuth } from '../App';
 import { User, Role } from '../types';
+import IDCardModal from '../components/IDCardModal';
 import {
   useReactTable,
   getCoreRowModel,
@@ -43,11 +44,47 @@ const StaffList = () => {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
   
-  // Filtering State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterRole, setFilterRole] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterDepartment, setFilterDepartment] = useState('all');
+  // --- Filtering State with Persistence ---
+  
+  // Initialize state from localStorage if available
+  const [searchTerm, setSearchTerm] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nexus_staff_filters');
+      return saved ? JSON.parse(saved).search : '';
+    } catch { return ''; }
+  });
+
+  const [filterRole, setFilterRole] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nexus_staff_filters');
+      return saved ? JSON.parse(saved).role : 'all';
+    } catch { return 'all'; }
+  });
+
+  const [filterStatus, setFilterStatus] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nexus_staff_filters');
+      return saved ? JSON.parse(saved).status : 'all';
+    } catch { return 'all'; }
+  });
+
+  const [filterDepartment, setFilterDepartment] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nexus_staff_filters');
+      return saved ? JSON.parse(saved).department : 'all';
+    } catch { return 'all'; }
+  });
+
+  // Save filters to localStorage whenever they change
+  useEffect(() => {
+    const filters = {
+      search: searchTerm,
+      role: filterRole,
+      status: filterStatus,
+      department: filterDepartment
+    };
+    localStorage.setItem('nexus_staff_filters', JSON.stringify(filters));
+  }, [searchTerm, filterRole, filterStatus, filterDepartment]);
 
   // Table State
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -66,6 +103,9 @@ const StaffList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   
+  // ID Card Modal State
+  const [idCardUser, setIdCardUser] = useState<User | null>(null);
+
   const generateStaffId = () => {
     const year = new Date().getFullYear().toString().slice(-2);
     const random = Math.floor(1000 + Math.random() * 9000);
@@ -282,26 +322,37 @@ const StaffList = () => {
       header: () => <div className="text-right">Actions</div>,
       cell: info => {
         const user = info.row.original;
-        return canEditUser(user) ? (
+        return (
           <div className="flex items-center justify-end gap-2">
-            <button 
-              onClick={() => handleOpenEdit(user)}
-              className="p-2 text-slate-400 hover:text-navy-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-navy-700 rounded-lg transition-colors"
-              title="Edit User"
+            <button
+               onClick={() => setIdCardUser(user)}
+               className="p-2 text-slate-400 hover:text-navy-900 dark:hover:text-gold-500 hover:bg-slate-200 dark:hover:bg-navy-700 rounded-lg transition-colors"
+               title="View ID Card"
             >
-              <Edit2 className="w-4 h-4" />
+                <CreditCard className="w-4 h-4" />
             </button>
-            {currentUser?.role === 'admin' && (
-              <button 
-                onClick={() => handleDelete(user.id)}
-                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                title="Delete User"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+            {canEditUser(user) && (
+              <>
+                <button 
+                  onClick={() => handleOpenEdit(user)}
+                  className="p-2 text-slate-400 hover:text-navy-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-navy-700 rounded-lg transition-colors"
+                  title="Edit User"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                {currentUser?.role === 'admin' && (
+                  <button 
+                    onClick={() => handleDelete(user.id)}
+                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    title="Delete User"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </>
             )}
           </div>
-        ) : null;
+        );
       }
     })
   ], [users, currentUser]);
@@ -596,6 +647,13 @@ const StaffList = () => {
            </div>
         </div>
       </Card>
+
+      {/* ID Card Modal */}
+      <IDCardModal 
+        isOpen={!!idCardUser} 
+        onClose={() => setIdCardUser(null)} 
+        user={idCardUser} 
+      />
 
       {/* Create/Edit User Modal */}
       <Modal

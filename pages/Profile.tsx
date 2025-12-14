@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useAuth } from '../App';
 import { useNavigate } from 'react-router-dom';
 import { Card, Input, Button, Badge } from '../components/ui/Components';
-import { User, Mail, Phone, MapPin, Briefcase, Calendar, Edit2, Save, X, FileText } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Briefcase, Calendar, Edit2, Save, X, FileText, CreditCard } from 'lucide-react';
+import IDCardModal from '../components/IDCardModal';
 
 const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
+  const [isIDModalOpen, setIsIDModalOpen] = useState(false);
   
   const [formData, setFormData] = useState({
     phone: user?.phone || '',
@@ -56,7 +58,7 @@ const Profile = () => {
                 <span>{user.department}</span>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               {isEditing ? (
                 <>
                   <Button variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
@@ -64,6 +66,10 @@ const Profile = () => {
                 </>
               ) : (
                 <>
+                  <Button variant="outline" onClick={() => setIsIDModalOpen(true)} className="text-navy-900 dark:text-gold-500 border-navy-200 dark:border-navy-600">
+                     <CreditCard className="w-4 h-4 mr-2" />
+                     View ID Card
+                  </Button>
                   <Button variant="outline" onClick={() => navigate('/bio-data')}>
                      <FileText className="w-4 h-4 mr-2" />
                      Update Bio Data
@@ -203,6 +209,12 @@ const Profile = () => {
           </Card>
         </div>
       </div>
+
+      <IDCardModal 
+        isOpen={isIDModalOpen}
+        onClose={() => setIsIDModalOpen(false)}
+        user={user}
+      />
     </div>
   );
 };

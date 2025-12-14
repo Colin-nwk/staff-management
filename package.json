@@ -16,7 +16,9 @@
     "lucide-react": "^0.561.0",
     "react-dom": "^19.2.3",
     "tailwind-merge": "^3.4.0",
-    "@tanstack/react-table": "8.11.8"
+    "@tanstack/react-table": "8.11.8",
+    "qrcode": "1.5.3",
+    "html2canvas": "1.4.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
