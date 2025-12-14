@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../App';
+import { useAuth, useToast } from '../App';
 import { useNavigate } from 'react-router-dom';
 import { Card, Input, Button, Badge } from '../components/ui/Components';
 import { User, Mail, Phone, MapPin, Briefcase, Calendar, Edit2, Save, X, FileText, CreditCard } from 'lucide-react';
@@ -7,6 +7,7 @@ import IDCardModal from '../components/IDCardModal';
 
 const Profile = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isIDModalOpen, setIsIDModalOpen] = useState(false);
@@ -22,7 +23,7 @@ const Profile = () => {
 
   const handleSave = () => {
     setIsEditing(false);
-    alert("Changes submitted for approval!");
+    toast('success', "Profile changes submitted for approval.", "Profile Updated");
   };
 
   return (

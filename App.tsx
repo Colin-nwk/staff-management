@@ -3,6 +3,7 @@ import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'reac
 import { Layout } from './components/Layout';
 import { MOCK_USERS, MOCK_NOTIFICATIONS, MOCK_DOCUMENTS, MOCK_POLICIES } from './constants';
 import { User, Role, ApprovalItem, Complaint, Message, Notification, Document, Policy } from './types';
+import { ToastContainer, ToastMessage, ToastType } from './components/ui/Toast';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -31,6 +32,19 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) throw new Error('useTheme must be used within a ThemeProvider');
+  return context;
+};
+
+// --- Toast Context ---
+interface ToastContextType {
+  toast: (type: ToastType, message: string, title?: string, duration?: number) => void;
+}
+
+const ToastContext = createContext<ToastContextType | undefined>(undefined);
+
+export const useToast = () => {
+  const context = useContext(ToastContext);
+  if (!context) throw new Error('useToast must be used within a ToastProvider');
   return context;
 };
 
@@ -257,6 +271,18 @@ export default function App() {
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
+  // Toast State
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const toast = (type: ToastType, message: string, title?: string, duration = 4000) => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setToasts(prev => [...prev, { id, type, message, title, duration }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
   };
 
   // Auth State
@@ -494,10 +520,12 @@ export default function App() {
       if (foundUser) {
         setUser(foundUser);
         localStorage.setItem('nexus_user', JSON.stringify(foundUser));
+        toast('success', `Welcome back, ${foundUser.firstName}!`);
       } else {
         const demoUser = MOCK_USERS.find(u => u.role === role) || MOCK_USERS[0];
         setUser(demoUser);
         localStorage.setItem('nexus_user', JSON.stringify(demoUser));
+        toast('success', `Welcome back, ${demoUser.firstName}! (Demo Access)`);
       }
       setIsLoading(false);
     }, 800);
@@ -506,24 +534,28 @@ export default function App() {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('nexus_user');
+    toast('info', 'You have been signed out.');
   };
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <AuthContext.Provider value={{ user, login, logout, isLoading }}>
-        <NotificationContext.Provider value={{ notifications: userNotifications, unreadCount, addNotification, markAsRead, markAllAsRead }}>
-          <DocumentContext.Provider value={{ documents, addDocument, updateDocument, updateDocumentStatus }}>
-            <PolicyContext.Provider value={{ policies, addPolicy }}>
-              <ApprovalContext.Provider value={{ approvals, addApproval, processApproval }}>
-                <ComplaintContext.Provider value={{ complaints, createComplaint, sendMessage, updateStatus }}>
-                  <Router>
-                    <AppContent />
-                  </Router>
-                </ComplaintContext.Provider>
-              </ApprovalContext.Provider>
-            </PolicyContext.Provider>
-          </DocumentContext.Provider>
-        </NotificationContext.Provider>
+        <ToastContext.Provider value={{ toast }}>
+          <NotificationContext.Provider value={{ notifications: userNotifications, unreadCount, addNotification, markAsRead, markAllAsRead }}>
+            <DocumentContext.Provider value={{ documents, addDocument, updateDocument, updateDocumentStatus }}>
+              <PolicyContext.Provider value={{ policies, addPolicy }}>
+                <ApprovalContext.Provider value={{ approvals, addApproval, processApproval }}>
+                  <ComplaintContext.Provider value={{ complaints, createComplaint, sendMessage, updateStatus }}>
+                    <Router>
+                      <AppContent />
+                      <ToastContainer toasts={toasts} removeToast={removeToast} />
+                    </Router>
+                  </ComplaintContext.Provider>
+                </ApprovalContext.Provider>
+              </PolicyContext.Provider>
+            </DocumentContext.Provider>
+          </NotificationContext.Provider>
+        </ToastContext.Provider>
       </AuthContext.Provider>
     </ThemeContext.Provider>
   );

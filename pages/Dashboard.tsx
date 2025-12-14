@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth, useApprovals, useNotifications, usePolicies } from '../App';
+import { useAuth, useApprovals, useNotifications, usePolicies, useToast } from '../App';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Modal, Input, TextArea } from '../components/ui/Components';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
@@ -30,6 +30,7 @@ const StaffDashboard = () => {
   const { user } = useAuth();
   const { addApproval } = useApprovals();
   const { notifications, markAllAsRead } = useNotifications();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,7 +54,7 @@ const StaffDashboard = () => {
       setIsSubmitting(false);
       setIsLeaveModalOpen(false);
       setLeaveData({ startDate: '', endDate: '', reason: '' });
-      alert("Leave request submitted successfully! HR will review it shortly.");
+      toast('success', "Your leave request has been submitted to HR.", "Request Submitted");
     }, 1500);
   };
 
@@ -178,6 +179,7 @@ const HRDashboard = () => {
   const { approvals } = useApprovals();
   const { addNotification } = useNotifications();
   const { addPolicy } = usePolicies();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const pendingCount = approvals.filter(a => a.status === 'pending').length;
 
@@ -196,7 +198,7 @@ const HRDashboard = () => {
     setTimeout(() => {
       setIsProcessing(false);
       setIsReportModalOpen(false);
-      alert(`${reportConfig.type} Report (${reportConfig.range}) has been generated in ${reportConfig.format} format.`);
+      toast('success', `${reportConfig.type} Report (${reportConfig.range}) generated successfully.`, "Report Ready");
     }, 2000);
   };
 
@@ -227,6 +229,7 @@ const HRDashboard = () => {
         targetRole: 'all'
       });
       setPolicyConfig({ title: '', content: '' });
+      toast('success', "New policy published to all staff.", "Policy Updated");
     }, 1500);
   };
 

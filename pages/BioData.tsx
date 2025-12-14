@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Input, Select } from '../components/ui/Components';
-import { useAuth, useApprovals } from '../App';
+import { useAuth, useApprovals, useToast } from '../App';
 import { BioData as BioDataType } from '../types';
 import { User, MapPin, Phone, CreditCard, ChevronRight, ChevronLeft, CheckCircle } from 'lucide-react';
 
@@ -15,6 +15,7 @@ const steps = [
 const BioData = () => {
   const { user } = useAuth();
   const { addApproval } = useApprovals();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,7 +66,7 @@ const BioData = () => {
       });
       setIsSubmitting(false);
       navigate('/profile');
-      alert("Bio Data submitted for review!");
+      toast('success', "Bio Data information has been submitted for review.", "Submission Successful");
     }, 1500);
   };
 
