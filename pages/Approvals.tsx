@@ -302,7 +302,7 @@ const Approvals = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-serif font-medium text-navy-900 dark:text-white">Approval Center</h2>
+          <h2 className="text-3xl font-medium text-navy-900 dark:text-white">Approval Center</h2>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Review and process staff requests</p>
         </div>
       </div>

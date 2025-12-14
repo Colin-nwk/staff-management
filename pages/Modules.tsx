@@ -21,7 +21,7 @@ const ModuleCard = ({ title, description, icon: Icon, onClick, color, active }: 
        <Icon className="w-6 h-6" />
     </div>
     
-    <h3 className="text-xl font-serif font-medium text-navy-900 dark:text-white mb-2 group-hover:text-gold-600 dark:group-hover:text-gold-400 transition-colors">
+    <h3 className="text-xl font-medium text-navy-900 dark:text-white mb-2 group-hover:text-gold-600 dark:group-hover:text-gold-400 transition-colors">
       {title}
     </h3>
     <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 line-clamp-2">
@@ -50,10 +50,10 @@ const Modules = () => {
       {/* Header */}
       <div className="max-w-6xl mx-auto flex justify-between items-center mb-12 animate-in fade-in slide-in-from-top-4 duration-500">
          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-navy-900 font-serif font-bold text-2xl shadow-lg border-2 border-gold-500">
+            <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-navy-900 font-bold text-2xl shadow-lg border-2 border-gold-500">
               N
             </div>
-            <span className="font-serif text-2xl font-medium tracking-tight text-navy-900 dark:text-white">Nigerian Correctional Service</span>
+            <span className="text-2xl font-medium tracking-tight text-navy-900 dark:text-white">Nigerian Correctional Service</span>
          </div>
          <div className="flex items-center gap-4">
              {user && (
@@ -78,7 +78,7 @@ const Modules = () => {
       {/* Grid */}
       <div className="max-w-6xl mx-auto">
          <div className="mb-8 animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
-            <h1 className="text-3xl font-serif font-medium text-navy-900 dark:text-white">Welcome, {user?.firstName}</h1>
+            <h1 className="text-3xl font-medium text-navy-900 dark:text-white">Welcome, {user?.firstName}</h1>
             <p className="text-slate-500 dark:text-slate-400 mt-2">Select a module to continue.</p>
          </div>
 

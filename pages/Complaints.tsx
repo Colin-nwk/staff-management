@@ -116,7 +116,7 @@ const Complaints = () => {
       >
         <div className="p-4 border-b border-slate-100 dark:border-navy-700">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="font-serif font-medium text-navy-900 dark:text-white text-lg">Help Desk</h2>
+                <h2 className="font-medium text-navy-900 dark:text-white text-lg">Help Desk</h2>
                 <Button size="sm" onClick={() => setIsNewModalOpen(true)}>
                     <Plus className="w-4 h-4 mr-1" /> New
                 </Button>
@@ -197,7 +197,7 @@ const Complaints = () => {
                         
                         <div>
                             <div className="flex items-center gap-3 flex-wrap">
-                                <h3 className="font-serif font-medium text-lg sm:text-xl text-navy-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">{activeComplaint.subject}</h3>
+                                <h3 className="font-medium text-lg sm:text-xl text-navy-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">{activeComplaint.subject}</h3>
                                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${getStatusColor(activeComplaint.status)}`}>
                                     {activeComplaint.status}
                                 </span>
@@ -268,92 +268,78 @@ const Complaints = () => {
                 </div>
 
                 {/* Input Area */}
-                <div className="p-3 sm:p-4 bg-white dark:bg-navy-800 border-t border-slate-200 dark:border-navy-700">
-                    {activeComplaint.status === 'resolved' ? (
-                        <div className="text-center p-3 bg-slate-50 dark:bg-navy-900 rounded-lg text-slate-500 dark:text-slate-400 text-sm">
-                            This ticket has been marked as resolved. Sending a message will reopen it.
-                        </div>
-                    ) : null}
-                    
-                    <form onSubmit={handleSendMessage} className="flex gap-2 mt-2">
-                        <input
-                            className="flex-1 h-11 rounded-lg border border-slate-300 dark:border-navy-600 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-gold-500 bg-slate-50 dark:bg-navy-900 text-slate-900 dark:text-white focus:bg-white dark:focus:bg-navy-950 transition-all placeholder-slate-400 dark:placeholder-slate-500"
-                            placeholder="Type message..."
+                <div className="p-4 bg-white dark:bg-navy-800 border-t border-slate-200 dark:border-navy-700">
+                    <form onSubmit={handleSendMessage} className="flex gap-2 items-end">
+                        <TextArea 
+                            placeholder="Type your message here..." 
+                            className="min-h-[60px] max-h-[120px] resize-y"
                             value={messageText}
-                            onChange={e => setMessageText(e.target.value)}
+                            onChange={(e) => setMessageText(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSendMessage(e);
+                                }
+                            }}
                         />
-                        <Button type="submit" disabled={!messageText.trim()}>
-                            <Send className="w-4 h-4" />
+                        <Button type="submit" className="h-[60px] px-6" disabled={!messageText.trim()}>
+                            <Send className="w-5 h-5" />
                         </Button>
                     </form>
                 </div>
             </>
         ) : (
-            <div className="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500 p-6">
-                <div className="w-16 h-16 bg-slate-100 dark:bg-navy-800 rounded-full flex items-center justify-center mb-4">
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50/30 dark:bg-navy-950/50">
+                <div className="w-16 h-16 bg-white dark:bg-navy-800 rounded-full flex items-center justify-center mb-4 shadow-sm">
                     <MessageSquare className="w-8 h-8 text-slate-300 dark:text-slate-600" />
                 </div>
-                <h3 className="text-lg font-medium text-navy-900 dark:text-white text-center">Support Center</h3>
-                <p className="max-w-xs text-center mt-2 text-sm">Select a ticket from the list to view the conversation or create a new complaint.</p>
-                <Button className="mt-6 md:hidden" onClick={() => { setSelectedId(null); setIsNewModalOpen(true); }}>
-                    Create New Ticket
-                </Button>
-                <Button className="mt-6 hidden md:flex" onClick={() => setIsNewModalOpen(true)}>
-                    Create New Ticket
-                </Button>
+                <h3 className="text-lg font-medium text-navy-900 dark:text-white mb-2">Select a Ticket</h3>
+                <p className="max-w-xs text-center text-sm">Choose a ticket from the list to view conversation history or send a reply.</p>
             </div>
         )}
       </Card>
 
       {/* New Ticket Modal */}
-      <Modal
-        isOpen={isNewModalOpen}
-        onClose={() => setIsNewModalOpen(false)}
-        title="Create New Support Ticket"
-      >
-        <form onSubmit={handleCreateSubmit} className="space-y-4">
-            <Input 
-                label="Subject" 
-                placeholder="Brief summary of the issue"
-                value={newTicket.subject}
-                onChange={e => setNewTicket({...newTicket, subject: e.target.value})}
-                required
-            />
-            
-            <div className="grid grid-cols-2 gap-4">
-                <Select
-                    label="Category"
-                    value={newTicket.category}
-                    onChange={e => setNewTicket({...newTicket, category: e.target.value as any})}
-                >
-                    <option value="Payroll">Payroll</option>
-                    <option value="Leave">Leave & Attendance</option>
-                    <option value="Workplace">Workplace Issue</option>
-                    <option value="IT">IT Support</option>
-                    <option value="Other">Other</option>
-                </Select>
-                <Select
-                    label="Priority"
-                    value={newTicket.priority}
-                    onChange={e => setNewTicket({...newTicket, priority: e.target.value as any})}
-                >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="critical">Critical</option>
-                </Select>
-            </div>
+      <Modal isOpen={isNewModalOpen} onClose={() => setIsNewModalOpen(false)} title="Create Support Ticket">
+          <form onSubmit={handleCreateSubmit} className="space-y-4">
+              <Input 
+                  label="Subject" 
+                  placeholder="Brief summary of the issue"
+                  value={newTicket.subject}
+                  onChange={e => setNewTicket({...newTicket, subject: e.target.value})}
+                  required
+              />
+              
+              <div className="grid grid-cols-2 gap-4">
+                  <Select 
+                      label="Category"
+                      value={newTicket.category}
+                      onChange={e => setNewTicket({...newTicket, category: e.target.value as any})}
+                  >
+                      <option value="Payroll">Payroll</option>
+                      <option value="Leave">Leave</option>
+                      <option value="Workplace">Workplace</option>
+                      <option value="IT">IT Support</option>
+                      <option value="Other">Other</option>
+                  </Select>
+                  
+                  <Select 
+                      label="Priority"
+                      value={newTicket.priority}
+                      onChange={e => setNewTicket({...newTicket, priority: e.target.value as any})}
+                  >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="critical">Critical</option>
+                  </Select>
+              </div>
 
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-xs rounded-lg border border-blue-100 dark:border-blue-900/30">
-                <p className="font-bold mb-1">Note:</p>
-                All complaints are treated with confidentiality. High priority issues will be flagged to HR immediately.
-            </div>
-
-            <div className="flex justify-end gap-3 pt-2">
-                <Button type="button" variant="ghost" onClick={() => setIsNewModalOpen(false)}>Cancel</Button>
-                <Button type="submit">Create Ticket</Button>
-            </div>
-        </form>
+              <div className="flex justify-end gap-3 pt-2">
+                  <Button variant="ghost" onClick={() => setIsNewModalOpen(false)}>Cancel</Button>
+                  <Button type="submit">Create Ticket</Button>
+              </div>
+          </form>
       </Modal>
     </div>
   );

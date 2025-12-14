@@ -16,6 +16,7 @@ import Settings from './pages/Settings';
 import BioData from './pages/BioData';
 import Complaints from './pages/Complaints';
 import Policies from './pages/Policies';
+import PolicyDetail from './pages/PolicyDetail';
 import ForgotPassword from './pages/ForgotPassword';
 import Modules from './pages/Modules';
 
@@ -215,6 +216,14 @@ const AppContent = () => {
         <ProtectedRoute>
           <Layout user={user!} onLogout={logout} pendingApprovals={pendingCount}>
             <Policies />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/policies/:id" element={
+        <ProtectedRoute>
+          <Layout user={user!} onLogout={logout} pendingApprovals={pendingCount}>
+            <PolicyDetail />
           </Layout>
         </ProtectedRoute>
       } />

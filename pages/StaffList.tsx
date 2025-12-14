@@ -410,7 +410,7 @@ const StaffList = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-serif font-medium text-navy-900 dark:text-white">Staff Directory</h2>
+          <h2 className="text-3xl font-medium text-navy-900 dark:text-white">Staff Directory</h2>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Manage and view all employee records</p>
         </div>
         <div className="flex gap-2">

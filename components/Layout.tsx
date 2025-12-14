@@ -159,11 +159,11 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
         {/* Logo Area */}
         <div className={cn("h-16 flex items-center border-b border-navy-800 transition-all duration-300 flex-shrink-0", isCollapsed ? "justify-center px-0" : "px-6 justify-between")}>
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-navy-900 font-serif font-bold text-xl shadow-lg border-2 border-gold-500 flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-navy-900 font-bold text-xl shadow-lg border-2 border-gold-500 flex-shrink-0">
               <span className="text-navy-600">N</span>
             </div>
             {!isCollapsed && (
-               <span className="font-serif text-2xl font-medium tracking-tight text-slate-100 whitespace-nowrap overflow-hidden transition-all duration-300">NCoS</span>
+               <span className="text-2xl font-medium tracking-tight text-slate-100 whitespace-nowrap overflow-hidden transition-all duration-300">NCoS</span>
             )}
           </Link>
           <button 

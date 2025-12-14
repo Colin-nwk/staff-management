@@ -35,7 +35,7 @@ const Settings = () => {
       <div className="lg:col-span-3">
         <Card>
           <div className="flex justify-between items-center mb-6">
-             <h3 className="font-serif text-xl font-medium text-navy-900 dark:text-white">
+             <h3 className="text-xl font-medium text-navy-900 dark:text-white">
                {activeSection.charAt(0).toUpperCase() + activeSection.slice(1)} Settings
              </h3>
              <Button>

@@ -19,7 +19,7 @@ const StatCard = ({ title, value, sub, icon: Icon, color = 'navy' }: any) => (
         <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</h3>
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="text-3xl font-serif font-semibold text-navy-900 dark:text-white">{value}</span>
+        <span className="text-3xl font-semibold text-navy-900 dark:text-white">{value}</span>
         {sub && <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center">{sub} <ArrowUpRight className="w-3 h-3 ml-0.5" /></span>}
       </div>
     </div>
@@ -71,7 +71,7 @@ const StaffDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card>
-            <h3 className="font-serif text-xl font-medium text-navy-900 dark:text-white mb-6">Recent Activity</h3>
+            <h3 className="text-xl font-medium text-navy-900 dark:text-white mb-6">Recent Activity</h3>
             <div className="space-y-6">
               {[
                 { title: 'Leave Request Approved', date: 'Today', icon: CheckCircle, color: 'text-emerald-500' },
@@ -92,7 +92,7 @@ const StaffDashboard = () => {
 
           <Card>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="font-serif text-xl font-medium text-navy-900 dark:text-white">Notifications</h3>
+              <h3 className="text-xl font-medium text-navy-900 dark:text-white">Notifications</h3>
               <Button variant="ghost" size="sm" onClick={markAllAsRead}>Mark all read</Button>
             </div>
             <div className="space-y-4">
@@ -115,7 +115,7 @@ const StaffDashboard = () => {
 
         <div>
            <Card>
-              <h3 className="font-serif text-xl font-medium text-navy-900 dark:text-white mb-6">Quick Actions</h3>
+              <h3 className="text-xl font-medium text-navy-900 dark:text-white mb-6">Quick Actions</h3>
               <div className="space-y-3">
                 <Button onClick={() => setIsLeaveModalOpen(true)} className="w-full justify-between group">
                   <span>Request Leave</span>
@@ -252,7 +252,7 @@ const HRDashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
-          <h3 className="font-serif text-xl font-medium text-navy-900 dark:text-white mb-6">Staff Attendance Trends</h3>
+          <h3 className="text-xl font-medium text-navy-900 dark:text-white mb-6">Staff Attendance Trends</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data}>
@@ -271,7 +271,7 @@ const HRDashboard = () => {
         </Card>
 
         <Card>
-          <h3 className="font-serif text-xl font-medium text-navy-900 dark:text-white mb-6">Quick Actions</h3>
+          <h3 className="text-xl font-medium text-navy-900 dark:text-white mb-6">Quick Actions</h3>
           <div className="space-y-3">
             <Button variant="primary" className="w-full justify-between group" onClick={() => navigate('/approvals')}>
               <span>Approve Leave Requests</span>
@@ -416,7 +416,7 @@ const AdminDashboard = () => (
      <div className="bg-navy-900 dark:bg-navy-800 rounded-xl p-6 text-white relative overflow-hidden shadow-lg">
         <div className="relative z-10 flex justify-between items-center">
           <div>
-            <h2 className="font-serif text-2xl font-medium mb-2">System Status: Healthy</h2>
+            <h2 className="text-2xl font-medium mb-2">System Status: Healthy</h2>
             <p className="text-slate-400">All services operational. Last backup: 2 hours ago.</p>
           </div>
           <Button variant="secondary" size="sm">Run Diagnostics</Button>
@@ -435,7 +435,7 @@ const AdminDashboard = () => (
      </div>
 
      <Card>
-       <h3 className="font-serif text-xl font-medium text-navy-900 dark:text-white mb-6">User Access Logs</h3>
+       <h3 className="text-xl font-medium text-navy-900 dark:text-white mb-6">User Access Logs</h3>
        <div className="overflow-x-auto">
          <table className="w-full text-left text-sm">
            <thead>
@@ -479,7 +479,7 @@ const Dashboard = () => {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-3xl font-serif font-medium text-navy-900 dark:text-white">Dashboard</h2>
+        <h2 className="text-3xl font-medium text-navy-900 dark:text-white">Dashboard</h2>
         <p className="text-slate-500 dark:text-slate-400 mt-1">Welcome back, {user.firstName}. Here's what's happening today.</p>
       </div>
       
