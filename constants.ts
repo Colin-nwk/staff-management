@@ -72,7 +72,8 @@ export const MOCK_DOCUMENTS: Document[] = [
     uploadedBy: 'Sarah Chen',
     version: 1,
     history: [],
-    notes: 'Initial contract signing'
+    notes: 'Initial contract signing',
+    url: 'https://pdfobject.com/pdf/sample.pdf' // Sample public PDF
   },
   { 
     id: 'd2', 
@@ -86,6 +87,7 @@ export const MOCK_DOCUMENTS: Document[] = [
     uploadedBy: 'Sarah Chen',
     version: 2,
     notes: 'Updated expiry date',
+    url: 'https://picsum.photos/800/600', // Sample Image
     history: [
       {
         id: 'd2_v1',
@@ -94,7 +96,8 @@ export const MOCK_DOCUMENTS: Document[] = [
         size: '1.0 MB',
         uploadedBy: 'Sarah Chen',
         version: 1,
-        notes: 'Initial upload of ID'
+        notes: 'Initial upload of ID',
+        url: 'https://picsum.photos/800/600?grayscale'
       }
     ]
   },

@@ -45,6 +45,7 @@ export interface DocumentVersion {
   uploadedBy: string;
   version: number;
   notes?: string;
+  url?: string; // URL for preview
 }
 
 export interface Document {
@@ -60,6 +61,7 @@ export interface Document {
   version: number;
   history?: DocumentVersion[];
   notes?: string;
+  url?: string; // URL for preview
 }
 
 export interface Policy {

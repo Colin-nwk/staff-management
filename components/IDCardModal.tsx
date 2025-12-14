@@ -18,22 +18,15 @@ const IDCardModal: React.FC<IDCardModalProps> = ({ isOpen, onClose, user }) => {
 
   useEffect(() => {
     if (user && isOpen) {
-      // Generate vCard data for QR Code
-      const qrData = `BEGIN:VCARD
-VERSION:3.0
-N:${user.lastName};${user.firstName}
-FN:${user.firstName} ${user.lastName}
-ORG:Nigerian Correctional Service
-TITLE:${user.position}
-TEL;TYPE=CELL:${user.phone || ''}
-EMAIL:${user.email}
-END:VCARD`;
+      // Generate Verification URL linking to staff details
+      // Using hash router format since the app uses HashRouter
+      const verificationUrl = `${window.location.origin}/#/staff-profile/${user.id}`;
 
-      QRCode.toDataURL(qrData, { 
+      QRCode.toDataURL(verificationUrl, { 
         width: 256, 
-        margin: 1, 
-        color: { dark: '#000000', light: '#ffffff' },
-        errorCorrectionLevel: 'M'
+        margin: 0, 
+        color: { dark: '#064e3b', light: '#ffffff' }, // NCoS Green dots
+        errorCorrectionLevel: 'H'
       })
       .then((url: string) => {
         setQrCodeUrl(url);
@@ -51,9 +44,9 @@ END:VCARD`;
     setIsDownloading(true);
     try {
       const canvas = await html2canvas(cardRef.current, {
-        scale: 3, // Higher resolution
+        scale: 3, // Higher resolution for print quality
         backgroundColor: null,
-        useCORS: true // Attempt to load external images
+        useCORS: true
       });
       const link = document.createElement('a');
       link.download = `NCoS_ID_${user.firstName}_${user.lastName}.png`;
@@ -76,9 +69,34 @@ END:VCARD`;
       printWindow.document.write(`
         <html>
           <head>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+            <script>
+              tailwind.config = {
+                theme: {
+                  extend: {
+                    fontFamily: {
+                      serif: ['"Crimson Pro"', 'serif'],
+                      sans: ['"DM Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                      navy: {
+                        900: '#064e3b',
+                        950: '#022c22',
+                        800: '#0e6538',
+                        700: '#0b7f43',
+                      },
+                      gold: {
+                        400: '#fbbf24',
+                        500: '#f59e0b',
+                      }
+                    }
+                  }
+                }
+              }
+            </script>
             <style>
-              body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-              .id-card-container { transform: scale(1); transform-origin: top left; }
+              body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; -webkit-print-color-adjust: exact; }
             </style>
           </head>
           <body>
@@ -91,80 +109,84 @@ END:VCARD`;
       setTimeout(() => {
         printWindow.print();
         printWindow.close();
-      }, 500); // Allow time for images to load
+      }, 1000);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Staff Identity Card" className="max-w-2xl">
+    <Modal isOpen={isOpen} onClose={onClose} title="Staff Identity Card" className="max-w-md">
       <div className="flex flex-col items-center space-y-6">
         
         {/* ID Card Display Area */}
         <div id="printable-id-card">
           <div 
             ref={cardRef}
-            className="w-[400px] h-[250px] bg-gradient-to-br from-navy-900 to-navy-800 rounded-xl shadow-2xl overflow-hidden relative text-white flex border border-navy-700"
+            className="w-[320px] h-[540px] bg-gradient-to-b from-navy-900 via-navy-800 to-navy-900 rounded-2xl shadow-2xl overflow-hidden relative text-white flex flex-col border border-navy-700"
             style={{ fontFamily: '"DM Sans", sans-serif' }}
           >
-             {/* Background Pattern */}
-             <div className="absolute top-0 right-0 w-48 h-48 bg-gold-500 rounded-full mix-blend-overlay opacity-10 blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-             <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500 rounded-full mix-blend-overlay opacity-10 blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
+             {/* Background Patterns */}
+             <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500 rounded-full mix-blend-overlay opacity-10 blur-3xl transform translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+             <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500 rounded-full mix-blend-overlay opacity-10 blur-3xl transform -translate-x-1/3 translate-y-1/3 pointer-events-none"></div>
+             <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" 
+                  style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}>
+             </div>
 
-             {/* Left Side: Photo */}
-             <div className="w-1/3 bg-navy-950/30 flex flex-col items-center justify-center p-4 border-r border-white/10 relative z-10">
-                <div className="w-24 h-24 rounded-full border-4 border-gold-500 shadow-lg overflow-hidden mb-3 bg-white">
-                  <img 
-                    src={user.avatarUrl} 
-                    alt="Staff" 
-                    className="w-full h-full object-cover"
-                    crossOrigin="anonymous" 
-                  />
+             {/* 1. Header Section (Compact) */}
+             <div className="pt-5 pb-2 flex flex-col items-center relative z-10">
+                <div className="flex items-center gap-2 mb-1">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-white to-slate-100 flex items-center justify-center text-navy-900 font-serif font-bold text-lg shadow-md border-2 border-gold-500">N</div>
                 </div>
-                <div className="text-center">
-                    <span className="block text-[10px] uppercase tracking-widest opacity-60">Join Date</span>
-                    <span className="text-xs font-mono font-medium">{user.joinDate}</span>
+                <span className="font-serif text-xs font-bold tracking-[0.2em] uppercase text-center leading-tight text-gold-400">Nigerian<br/>Correctional Service</span>
+             </div>
+
+             {/* 2. Photo Section (Large & Prominent) */}
+             <div className="flex justify-center py-2 relative z-10">
+                <div className="w-44 h-44 rounded-full border-[4px] border-white/20 shadow-2xl overflow-hidden bg-navy-900 relative">
+                    <div className="absolute inset-0 border-2 border-gold-500 rounded-full z-20"></div>
+                    <img 
+                        src={user.avatarUrl} 
+                        alt="Staff" 
+                        className="w-full h-full object-cover relative z-10"
+                        crossOrigin="anonymous" 
+                    />
                 </div>
              </div>
 
-             {/* Right Side: Details */}
-             <div className="flex-1 p-5 flex flex-col justify-between relative z-10">
-                <div className="flex justify-between items-start">
-                   <div>
-                      <div className="flex items-center gap-2 mb-1">
-                         <div className="w-6 h-6 rounded bg-gradient-to-br from-white to-slate-100 flex items-center justify-center text-navy-900 font-serif font-bold text-xs shadow-sm border border-gold-500">N</div>
-                         <span className="font-serif text-sm font-bold tracking-tight uppercase">Nigerian Correctional<br/>Service</span>
-                      </div>
-                   </div>
-                   {/* QR Code */}
-                   <div className="p-1 bg-white rounded-lg">
-                      <div style={{ height: "64px", width: "64px" }}>
-                        {qrCodeUrl && (
-                            <img src={qrCodeUrl} alt="QR Code" className="w-full h-full" />
-                        )}
-                      </div>
-                   </div>
+             {/* 3. User Identity (Centered & Tight) */}
+             <div className="text-center px-4 relative z-10 mt-1">
+                <h2 className="text-2xl font-bold leading-tight text-white mb-1">{user.firstName} {user.lastName}</h2>
+                <div className="inline-block px-4 py-0.5 bg-gold-500 text-navy-900 rounded-full text-[10px] font-bold uppercase tracking-wider mb-1 shadow-sm">
+                    {user.position}
                 </div>
+                <p className="text-[10px] text-slate-300 uppercase tracking-wide opacity-80">{user.department} Dept.</p>
+             </div>
 
-                <div className="mt-2">
-                   <h2 className="text-xl font-bold leading-tight">{user.firstName} {user.lastName}</h2>
-                   <p className="text-gold-400 text-xs uppercase font-bold tracking-wider mt-0.5">{user.position}</p>
-                   <p className="text-xs opacity-70 mt-0.5">{user.department} Dept.</p>
+             {/* 4. Info Bar (Horizontal Grid) */}
+             <div className="px-6 py-4 relative z-10">
+                <div className="bg-white/10 rounded-lg p-2 border border-white/10 backdrop-blur-md flex justify-around items-center text-center divide-x divide-white/20">
+                    <div className="flex-1 px-1">
+                        <span className="block text-[8px] text-slate-300 uppercase tracking-wider font-semibold mb-0.5">Staff ID</span>
+                        <span className="block text-sm font-mono font-bold text-white tracking-wide">{user.id.toUpperCase().replace('NEX', 'NCoS')}</span>
+                    </div>
+                     <div className="flex-1 px-1">
+                        <span className="block text-[8px] text-slate-300 uppercase tracking-wider font-semibold mb-0.5">Joined</span>
+                        <span className="block text-xs font-medium text-white">{user.joinDate}</span>
+                    </div>
                 </div>
+             </div>
 
-                <div className="space-y-1 mt-2">
-                   <div className="flex justify-between items-end border-b border-white/10 pb-1">
-                      <span className="text-[10px] opacity-60 uppercase">Staff ID</span>
-                      <span className="text-xs font-mono font-bold">{user.id.toUpperCase().replace('NEX', 'NCoS')}</span>
-                   </div>
-                   <div className="flex justify-between items-end border-b border-white/10 pb-1">
-                       <span className="text-[10px] opacity-60 uppercase">Email</span>
-                       <span className="text-[10px]">{user.email}</span>
-                   </div>
-                   <div className="flex justify-between items-end">
-                       <span className="text-[10px] opacity-60 uppercase">Phone</span>
-                       <span className="text-[10px]">{user.phone || 'N/A'}</span>
-                   </div>
+             {/* 5. Footer & QR (Bottom Anchored) */}
+             <div className="mt-auto pb-6 flex flex-col items-center justify-center relative z-10">
+                <div className="p-2 bg-white rounded-xl shadow-lg mb-2">
+                    <div style={{ height: "112px", width: "112px" }}>
+                    {qrCodeUrl && (
+                        <img src={qrCodeUrl} alt="QR Code" className="w-full h-full" />
+                    )}
+                    </div>
                 </div>
+                 <p className="text-[8px] text-slate-400 leading-tight text-center max-w-[200px] opacity-70">
+                    Scan to verify staff identity & status. <br/>Property of Federal Government of Nigeria.
+                 </p>
              </div>
           </div>
         </div>
@@ -180,10 +202,6 @@ END:VCARD`;
               Print Card
            </Button>
         </div>
-
-        <p className="text-xs text-slate-400 text-center max-w-sm">
-           This ID card is property of the Nigerian Correctional Service. If found, please return to the nearest NCoS office or contact support.
-        </p>
       </div>
     </Modal>
   );

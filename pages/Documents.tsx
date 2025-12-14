@@ -1,8 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, Button, Badge, Modal, Input, TextArea } from '../components/ui/Components';
 import { Document, DocumentVersion } from '../types';
 import { useAuth, useApprovals, useDocuments } from '../App';
-import { UploadCloud, FileText, Download, Trash2, Eye, History, Upload, File, X, Quote } from 'lucide-react';
+import { UploadCloud, FileText, Download, Trash2, Eye, History, Upload, File, X, Quote, Maximize2, ExternalLink } from 'lucide-react';
 
 const Documents = () => {
   const { user } = useAuth();
@@ -15,6 +15,7 @@ const Documents = () => {
   const [historyModalDoc, setHistoryModalDoc] = useState<Document | null>(null);
   const [uploadVersionDoc, setUploadVersionDoc] = useState<Document | null>(null);
   const [isNewDocModalOpen, setIsNewDocModalOpen] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
 
   // Upload State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -54,6 +55,7 @@ const Documents = () => {
     setHistoryModalDoc(null);
     setUploadVersionDoc(null);
     setIsNewDocModalOpen(false);
+    setPreviewDoc(null);
     resetUploadState();
   };
 
@@ -138,6 +140,9 @@ const Documents = () => {
     if (!selectedFile || !user) return;
 
     simulateUploadProcess(() => {
+        const previewUrl = URL.createObjectURL(selectedFile);
+        const fileExt = selectedFile.name.split('.').pop()?.toUpperCase() || 'FILE';
+
         const newDoc: Document = {
             id: `d${Date.now()}`,
             userId: user.id,
@@ -146,11 +151,12 @@ const Documents = () => {
             status: 'pending',
             dateUploaded: 'Just now',
             size: formatBytes(selectedFile.size),
-            type: selectedFile.name.split('.').pop()?.toUpperCase() || 'FILE',
+            type: fileExt,
             uploadedBy: `${user.firstName} ${user.lastName}`,
             version: 1,
             history: [],
-            notes: 'Initial Upload'
+            notes: 'Initial Upload',
+            url: previewUrl
         };
         addDocument(newDoc);
         
@@ -179,19 +185,24 @@ const Documents = () => {
         size: uploadVersionDoc.size,
         uploadedBy: uploadVersionDoc.uploadedBy,
         version: uploadVersionDoc.version,
-        notes: uploadVersionDoc.notes
+        notes: uploadVersionDoc.notes,
+        url: uploadVersionDoc.url
       };
       
+      const previewUrl = URL.createObjectURL(selectedFile);
+      const fileExt = selectedFile.name.split('.').pop()?.toUpperCase() || 'FILE';
+
       const updatedDoc: Document = {
         ...uploadVersionDoc,
         version: uploadVersionDoc.version + 1,
         dateUploaded: 'Just now',
         status: 'pending',
         size: formatBytes(selectedFile.size),
-        type: selectedFile.name.split('.').pop()?.toUpperCase() || 'FILE',
+        type: fileExt,
         uploadedBy: `${user.firstName} ${user.lastName}`,
         history: [historyEntry, ...(uploadVersionDoc.history || [])],
-        notes: versionNotes
+        notes: versionNotes,
+        url: previewUrl
       };
 
       updateDocument(updatedDoc);
@@ -243,6 +254,90 @@ const Documents = () => {
     </div>
   );
 
+  const PreviewContent = ({ doc }: { doc: Document }) => {
+    const [textContent, setTextContent] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!doc.url) {
+            setLoading(false);
+            return;
+        }
+
+        if (['MD', 'TXT', 'MARKDOWN'].includes(doc.type)) {
+            fetch(doc.url)
+                .then(res => res.text())
+                .then(text => {
+                    setTextContent(text);
+                    setLoading(false);
+                })
+                .catch(() => {
+                    setTextContent("Error loading text content.");
+                    setLoading(false);
+                });
+        } else {
+            setLoading(false);
+        }
+    }, [doc]);
+
+    if (!doc.url) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-slate-50 dark:bg-navy-900/50 rounded-lg">
+                <FileText className="w-16 h-16 text-slate-300 dark:text-slate-600 mb-4" />
+                <h3 className="text-lg font-medium text-slate-900 dark:text-white">Preview Not Available</h3>
+                <p className="text-slate-500 dark:text-slate-400 max-w-sm mt-2">
+                    This document does not have a preview available. You may need to download it to view the content.
+                </p>
+            </div>
+        );
+    }
+
+    if (loading) {
+        return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-navy-900 dark:border-white"></div></div>;
+    }
+
+    // Images
+    if (['JPG', 'JPEG', 'PNG', 'WEBP', 'GIF'].includes(doc.type)) {
+        return (
+            <div className="flex items-center justify-center bg-slate-100 dark:bg-navy-950 rounded-lg p-2 h-full overflow-auto">
+                <img src={doc.url} alt={doc.title} className="max-w-full max-h-[70vh] object-contain shadow-lg" />
+            </div>
+        );
+    }
+
+    // PDF
+    if (doc.type === 'PDF') {
+        return (
+            <div className="h-[75vh] w-full bg-slate-100 dark:bg-navy-900 rounded-lg overflow-hidden border border-slate-200 dark:border-navy-700">
+                <iframe src={doc.url} className="w-full h-full" title={doc.title}></iframe>
+            </div>
+        );
+    }
+
+    // Text / Markdown
+    if (['MD', 'TXT', 'MARKDOWN'].includes(doc.type)) {
+        return (
+            <div className="h-[70vh] w-full overflow-auto bg-white dark:bg-navy-950 p-6 rounded-lg border border-slate-200 dark:border-navy-700 font-mono text-sm whitespace-pre-wrap text-slate-800 dark:text-slate-200">
+                {textContent}
+            </div>
+        );
+    }
+
+    // Default Fallback
+    return (
+        <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-slate-50 dark:bg-navy-900/50 rounded-lg border-2 border-dashed border-slate-200 dark:border-navy-700">
+            <FileText className="w-16 h-16 text-slate-300 dark:text-slate-600 mb-4" />
+            <h3 className="text-lg font-medium text-slate-900 dark:text-white">No Preview for this File Type</h3>
+            <p className="text-slate-500 dark:text-slate-400 mt-2">
+                .{doc.type} files cannot be previewed directly. Please download the file to view it.
+            </p>
+            <Button className="mt-4" onClick={() => window.open(doc.url, '_blank')}>
+                <Download className="w-4 h-4 mr-2" /> Download File
+            </Button>
+        </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -272,7 +367,7 @@ const Documents = () => {
                <UploadCloud className="w-8 h-8" />
              </div>
              <h3 className="text-lg font-medium text-navy-900 dark:text-white">Upload New Document</h3>
-             <p className="text-slate-500 dark:text-slate-400 mt-1 max-w-sm">Drag and drop your files here, or click to browse. Supported formats: PDF, JPG, PNG (Max 5MB)</p>
+             <p className="text-slate-500 dark:text-slate-400 mt-1 max-w-sm">Drag and drop your files here, or click to browse. Supported formats: PDF, JPG, PNG, MD, TXT (Max 5MB)</p>
            </div>
         </Card>
 
@@ -352,10 +447,25 @@ const Documents = () => {
                                 <History className="w-4 h-4" />
                             </button>
                             <div className="w-px h-4 bg-slate-300 dark:bg-navy-600 mx-1"></div>
-                            <button className="p-2 text-slate-400 hover:text-navy-900 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-navy-700" title="View">
+                            <button 
+                                className="p-2 text-slate-400 hover:text-navy-900 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-navy-700" 
+                                title="View"
+                                onClick={() => setPreviewDoc(doc)}
+                            >
                                 <Eye className="w-4 h-4" />
                             </button>
-                            <button className="p-2 text-slate-400 hover:text-navy-900 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-navy-700" title="Download">
+                            <button 
+                                className="p-2 text-slate-400 hover:text-navy-900 dark:hover:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-navy-700" 
+                                title="Download"
+                                onClick={() => {
+                                    if(doc.url) {
+                                        const link = document.createElement('a');
+                                        link.href = doc.url;
+                                        link.download = doc.title;
+                                        link.click();
+                                    }
+                                }}
+                            >
                                 <Download className="w-4 h-4" />
                             </button>
                             {doc.status !== 'approved' && (
@@ -377,6 +487,53 @@ const Documents = () => {
 
       {/* --- Modals --- */}
 
+      {/* Document Preview Modal */}
+      {previewDoc && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-900/80 backdrop-blur-sm animate-in fade-in duration-200">
+             <div className="bg-white dark:bg-navy-800 rounded-xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 border border-transparent dark:border-navy-700">
+                 {/* Header */}
+                 <div className="px-6 py-4 border-b border-slate-100 dark:border-navy-700 flex justify-between items-center bg-slate-50/50 dark:bg-navy-900/50">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-white dark:bg-navy-800 rounded border border-slate-200 dark:border-navy-700">
+                            <FileText className="w-5 h-5 text-navy-900 dark:text-white" />
+                        </div>
+                        <div>
+                            <h3 className="font-serif text-lg font-medium text-navy-900 dark:text-white">{previewDoc.title}</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {previewDoc.type} • {previewDoc.size} • Uploaded {previewDoc.dateUploaded}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                         {previewDoc.url && (
+                             <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => window.open(previewDoc.url, '_blank')}
+                                title="Open in New Tab"
+                            >
+                                <ExternalLink className="w-4 h-4" />
+                             </Button>
+                         )}
+                         <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => setPreviewDoc(null)}
+                            className="text-slate-500 hover:text-navy-900 dark:text-slate-400 dark:hover:text-white"
+                         >
+                            <X className="w-5 h-5" />
+                         </Button>
+                    </div>
+                 </div>
+                 
+                 {/* Content */}
+                 <div className="flex-1 overflow-hidden p-2 bg-slate-100/50 dark:bg-navy-900/20">
+                     <PreviewContent doc={previewDoc} />
+                 </div>
+             </div>
+          </div>
+      )}
+
       {/* New Document Upload Modal */}
       <Modal
         isOpen={isNewDocModalOpen}
@@ -391,7 +548,7 @@ const Documents = () => {
                  >
                     <UploadCloud className="w-10 h-10 text-slate-400 mx-auto mb-3" />
                     <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Click to select file</p>
-                    <p className="text-xs text-slate-500 mt-1">PDF, JPG, PNG up to 5MB</p>
+                    <p className="text-xs text-slate-500 mt-1">PDF, JPG, PNG, MD, TXT up to 5MB</p>
                  </div>
               ) : (
                   <FilePreview file={selectedFile} onRemove={() => setSelectedFile(null)} />
@@ -457,7 +614,7 @@ const Documents = () => {
                 />
                 <UploadCloud className="w-10 h-10 text-slate-400 mx-auto mb-3" />
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Select new version file</p>
-                <p className="text-xs text-slate-500 mt-1">PDF, JPG, PNG up to 5MB</p>
+                <p className="text-xs text-slate-500 mt-1">PDF, JPG, PNG, MD, TXT up to 5MB</p>
              </div>
            ) : (
                 <FilePreview file={selectedFile} onRemove={() => setSelectedFile(null)} />
@@ -522,9 +679,21 @@ const Documents = () => {
                      </div>
                      <div className="text-right pl-4">
                        <span className="text-xs font-mono text-slate-500 dark:text-slate-400 block">{historyModalDoc.size}</span>
-                       <Button size="sm" variant="ghost" className="h-7 px-2 mt-2 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-500/20">
-                          <Download className="w-3 h-3 mr-1" /> Download
-                       </Button>
+                       <div className="flex flex-col gap-1 mt-2">
+                           {historyModalDoc.url && (
+                                <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    className="h-7 px-2 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
+                                    onClick={() => setPreviewDoc(historyModalDoc)}
+                                >
+                                    <Eye className="w-3 h-3 mr-1" /> View
+                                </Button>
+                           )}
+                           <Button size="sm" variant="ghost" className="h-7 px-2 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-500/20">
+                                <Download className="w-3 h-3 mr-1" /> Download
+                           </Button>
+                       </div>
                      </div>
                    </div>
                 </div>
