@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { 
   Button, Card, Input, Select, TextArea, Badge, Switch, Checkbox, 
-  Alert, Accordion, DropdownMenu, Modal 
+  Alert, Accordion, DropdownMenu, Modal, Tabs, TabsList, TabsTrigger, TabsContent,
+  SearchableSelect, MultiSelect, PaginatedSelect, Stepper, NumberInput, DatePicker, TimePicker, CurrencyInput, Slider
 } from '../components/ui/Components';
 import { DataTable } from '../components/ui/DataTable';
 import { useToast } from '../App';
 import { 
   Bell, CheckCircle, AlertTriangle, Info, MoreVertical, 
-  Trash2, Edit2, Copy, ShoppingCart, CreditCard, Box, User
+  Trash2, Edit2, Copy, ShoppingCart, CreditCard, Box, User, ArrowRight, ArrowLeft
 } from 'lucide-react';
 import { ColumnDef } from '@tanstack/react-table';
 
@@ -81,6 +82,61 @@ const Components = () => {
   const [switchState, setSwitchState] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
+  // State for Advanced Inputs
+  const [searchValue, setSearchValue] = useState('');
+  const [multiValue, setMultiValue] = useState<string[]>([]);
+  const [paginatedValue, setPaginatedValue] = useState('');
+  
+  // State for New Inputs
+  const [qty, setQty] = useState(1);
+  const [price, setPrice] = useState('199.99');
+  const [sliderValue, setSliderValue] = useState(50);
+
+  // State for Paginated Form (Stepper)
+  const [currentStep, setCurrentStep] = useState(0);
+  const steps = [
+    { id: 1, title: 'Account Details' },
+    { id: 2, title: 'Personal Info' },
+    { id: 3, title: 'Review' }
+  ];
+
+  const searchOptions = [
+    { value: 'apple', label: 'Apple' },
+    { value: 'banana', label: 'Banana' },
+    { value: 'cherry', label: 'Cherry' },
+    { value: 'date', label: 'Date' },
+    { value: 'elderberry', label: 'Elderberry' },
+    { value: 'fig', label: 'Fig' },
+    { value: 'grape', label: 'Grape' },
+  ];
+
+  // Mock Async Load
+  const loadMockData = async (page: number) => {
+    // Simulating fetching 5 items per page
+    const start = (page - 1) * 5;
+    const allItems = Array.from({length: 25}, (_, i) => ({ value: `item-${i+1}`, label: `Paginated Item ${i+1}` }));
+    const pageItems = allItems.slice(start, start + 5);
+    return {
+        options: pageItems,
+        hasMore: start + 5 < allItems.length
+    };
+  };
+
+  const handleNextStep = () => {
+      if (currentStep < steps.length - 1) {
+          setCurrentStep(curr => curr + 1);
+      } else {
+          toast('success', 'Form submitted successfully!', 'Completed');
+          setCurrentStep(0);
+      }
+  };
+
+  const handlePrevStep = () => {
+      if (currentStep > 0) {
+          setCurrentStep(curr => curr - 1);
+      }
+  };
+
   return (
     <div className="space-y-12 pb-20">
       <div>
@@ -135,7 +191,7 @@ const Components = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Card className="space-y-4">
                 <Input label="Text Input" placeholder="Type something..." />
-                <Select label="Select Option">
+                <Select label="Native Select">
                     <option>Option 1</option>
                     <option>Option 2</option>
                 </Select>
@@ -157,6 +213,195 @@ const Components = () => {
                         <Checkbox label="Subscribe to newsletter" />
                         <Checkbox label="Disabled option" disabled />
                     </div>
+                </div>
+            </Card>
+        </div>
+      </section>
+
+      {/* --- Advanced Form Controls (New) --- */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-medium border-b border-slate-200 dark:border-navy-800 pb-2">Advanced Form Controls</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="space-y-4">
+                <h3 className="font-medium">Number & Currency</h3>
+                <NumberInput 
+                    label="Quantity" 
+                    value={qty} 
+                    onChange={setQty} 
+                    min={0} 
+                    max={10} 
+                />
+                <CurrencyInput 
+                    label="Price" 
+                    value={price} 
+                    onChange={setPrice} 
+                />
+            </Card>
+            
+            <Card className="space-y-4">
+                <h3 className="font-medium">Date & Time</h3>
+                <DatePicker label="Select Date" />
+                <TimePicker label="Select Time" />
+            </Card>
+
+            <Card className="space-y-4">
+                <h3 className="font-medium">Sliders</h3>
+                <div className="pt-4">
+                    <Slider 
+                        label="Progress" 
+                        value={sliderValue} 
+                        onChange={(e) => setSliderValue(Number(e.target.value))} 
+                    />
+                </div>
+                <div className="pt-2">
+                    <Slider 
+                        label="Volume" 
+                        value={75} 
+                        disabled
+                    />
+                </div>
+            </Card>
+        </div>
+      </section>
+
+      {/* --- Advanced Selects --- */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-medium border-b border-slate-200 dark:border-navy-800 pb-2">Advanced Selects</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="space-y-6">
+               <h3 className="font-medium">Searchable Select</h3>
+               <SearchableSelect 
+                  label="Pick a Fruit"
+                  options={searchOptions}
+                  value={searchValue}
+                  onChange={setSearchValue}
+                  placeholder="Search fruits..."
+               />
+               <p className="text-xs text-slate-500">Selected Value: {searchValue || 'None'}</p>
+            </Card>
+
+            <Card className="space-y-6">
+               <h3 className="font-medium">Multi-Select</h3>
+               <MultiSelect 
+                  label="Select Favorites"
+                  options={searchOptions}
+                  value={multiValue}
+                  onChange={setMultiValue}
+                  placeholder="Select multiple..."
+               />
+               <p className="text-xs text-slate-500">Selected: {multiValue.join(', ') || 'None'}</p>
+            </Card>
+
+            <Card className="space-y-6">
+               <h3 className="font-medium">Paginated Select</h3>
+               <PaginatedSelect 
+                  label="Load Async Data"
+                  loadOptions={loadMockData}
+                  value={paginatedValue}
+                  onChange={setPaginatedValue}
+                  placeholder="Scroll to load more..."
+               />
+               <p className="text-xs text-slate-500">Selected ID: {paginatedValue || 'None'}</p>
+            </Card>
+        </div>
+      </section>
+
+      {/* --- Tabs & Accordion --- */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-medium border-b border-slate-200 dark:border-navy-800 pb-2">Tabs & Layouts</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <Card>
+                <Tabs defaultValue="account">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="account">Account</TabsTrigger>
+                        <TabsTrigger value="password">Password</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="account">
+                        <div className="space-y-4 py-4">
+                            <h4 className="font-medium">Account Settings</h4>
+                            <p className="text-sm text-slate-500">Manage your account details and preferences here.</p>
+                            <Input label="Username" defaultValue="@nexus_user" />
+                            <Button>Save Changes</Button>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="password">
+                        <div className="space-y-4 py-4">
+                            <h4 className="font-medium">Change Password</h4>
+                            <p className="text-sm text-slate-500">Ensure your new password is at least 8 characters long.</p>
+                            <Input type="password" label="Current Password" />
+                            <Input type="password" label="New Password" />
+                            <Button>Update Password</Button>
+                        </div>
+                    </TabsContent>
+                </Tabs>
+            </Card>
+
+            <div className="space-y-6">
+                <Card>
+                    <h4 className="font-medium mb-4">Accordion</h4>
+                    <Accordion items={[
+                        { title: "What is the NCoS System?", content: "It is a staff management platform for the Nigerian Correctional Service." },
+                        { title: "How do I reset my password?", content: "Go to the login page and click 'Forgot Password' to receive a reset link." },
+                        { title: "Can I access this on mobile?", content: "Yes, the system is fully responsive and works on mobile devices." }
+                    ]} />
+                </Card>
+            </div>
+        </div>
+      </section>
+
+      {/* --- Paginated Form (Stepper) --- */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-medium border-b border-slate-200 dark:border-navy-800 pb-2">Paginated Form (Wizard)</h2>
+        <div className="max-w-2xl mx-auto">
+            <Card>
+                <div className="mb-8">
+                    <Stepper steps={steps} currentStep={currentStep} />
+                </div>
+                
+                <div className="min-h-[200px] mb-6">
+                    {currentStep === 0 && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+                            <h3 className="text-lg font-medium text-navy-900 dark:text-white">Account Details</h3>
+                            <Input label="Username" placeholder="Enter username" />
+                            <Input label="Email Address" placeholder="Enter email" type="email" />
+                        </div>
+                    )}
+                    {currentStep === 1 && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+                            <h3 className="text-lg font-medium text-navy-900 dark:text-white">Personal Information</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input label="First Name" placeholder="John" />
+                                <Input label="Last Name" placeholder="Doe" />
+                            </div>
+                            <Input label="Address" placeholder="123 Main St" />
+                        </div>
+                    )}
+                    {currentStep === 2 && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+                            <h3 className="text-lg font-medium text-navy-900 dark:text-white">Review & Submit</h3>
+                            <div className="bg-slate-50 dark:bg-navy-800 p-4 rounded-lg text-sm space-y-2 text-slate-600 dark:text-slate-300">
+                                <p><strong>Username:</strong> johndoe123</p>
+                                <p><strong>Email:</strong> john@example.com</p>
+                                <p><strong>Name:</strong> John Doe</p>
+                                <p><strong>Address:</strong> 123 Main St</p>
+                            </div>
+                            <Alert variant="info" title="Confirmation">Please verify all details before submitting.</Alert>
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex justify-between border-t border-slate-100 dark:border-navy-800 pt-4">
+                    <Button 
+                        variant="ghost" 
+                        onClick={handlePrevStep} 
+                        disabled={currentStep === 0}
+                    >
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                    </Button>
+                    <Button onClick={handleNextStep}>
+                        {currentStep === steps.length - 1 ? 'Submit' : 'Next'} 
+                        {currentStep !== steps.length - 1 && <ArrowRight className="w-4 h-4 ml-2" />}
+                    </Button>
                 </div>
             </Card>
         </div>
@@ -206,19 +451,10 @@ const Components = () => {
         </div>
       </section>
 
-      {/* --- Accordion & Menus --- */}
+      {/* --- Interactive Menus --- */}
       <section className="space-y-4">
         <h2 className="text-xl font-medium border-b border-slate-200 dark:border-navy-800 pb-2">Interactive Elements</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-                <h4 className="text-sm font-medium mb-3">Accordion</h4>
-                <Accordion items={[
-                    { title: "What is the NCoS System?", content: "It is a staff management platform for the Nigerian Correctional Service." },
-                    { title: "How do I reset my password?", content: "Go to the login page and click 'Forgot Password' to receive a reset link." },
-                    { title: "Can I access this on mobile?", content: "Yes, the system is fully responsive and works on mobile devices." }
-                ]} />
-            </div>
-            
             <div className="space-y-6">
                 <div>
                     <h4 className="text-sm font-medium mb-3">Dropdown Menu</h4>
