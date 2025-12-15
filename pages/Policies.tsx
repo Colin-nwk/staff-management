@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Button, Input, Select, Badge, Modal, TextArea } from '../components/ui/Components';
+import { Card, Button, Input, Select, Badge, Modal, RichTextEditor } from '../components/ui/Components';
 import { usePolicies, useAuth, useToast } from '../App';
 import { BookOpen, Search, Shield, HardDrive, Download, Calendar, User, Eye, FileText, ArrowRight, Plus, MoreVertical, Edit2, Trash2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -32,10 +32,18 @@ const Policies = () => {
 
   const canManage = user?.role === 'hr' || user?.role === 'admin';
 
+  // Helper to strip HTML tags for card preview
+  const stripHtml = (html: string) => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
+
   // Filter and sort policies
   const filteredPolicies = policies.filter(policy => {
+    const cleanContent = stripHtml(policy.content).toLowerCase();
     const matchesSearch = policy.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          policy.content.toLowerCase().includes(searchTerm.toLowerCase());
+                          cleanContent.includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'All' || policy.category === categoryFilter;
     return matchesSearch && matchesCategory;
   }).sort((a, b) => new Date(b.dateUpdated).getTime() - new Date(a.dateUpdated).getTime());
@@ -223,7 +231,7 @@ const Policies = () => {
                   </h3>
                   
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 flex-1 line-clamp-3 leading-relaxed">
-                      {policy.content}
+                      {stripHtml(policy.content)}
                   </p>
 
                   <div className="pt-4 border-t border-slate-100 dark:border-navy-800 flex items-center justify-between mt-auto">
@@ -257,6 +265,7 @@ const Policies = () => {
          isOpen={isModalOpen}
          onClose={() => setIsModalOpen(false)}
          title={editingPolicy ? 'Edit Policy' : 'Create New Policy'}
+         className="max-w-3xl"
        >
            <form onSubmit={handleSubmit} className="space-y-4">
                <Input 
@@ -290,12 +299,10 @@ const Policies = () => {
                    />
                </div>
 
-               <TextArea 
-                 label="Policy Content / Summary"
+               <RichTextEditor 
+                 label="Policy Content"
                  value={formData.content}
-                 onChange={e => setFormData({...formData, content: e.target.value})}
-                 required
-                 rows={6}
+                 onChange={(val) => setFormData({...formData, content: val})}
                  placeholder="Enter the main details of the policy here..."
                />
 

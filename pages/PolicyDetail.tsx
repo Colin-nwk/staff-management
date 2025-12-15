@@ -131,11 +131,13 @@ const PolicyDetail = () => {
                   {/* Document Body */}
                   <div className="flex-1 px-8 md:px-12 py-10" ref={contentRef}>
                      <div className="prose dark:prose-invert max-w-none prose-slate prose-headings:font-bold prose-headings:text-navy-900 dark:prose-headings:text-white prose-p:leading-relaxed prose-li:marker:text-gold-500">
+                        {/* Executive Summary / Main Content */}
                         <div className="bg-slate-50 dark:bg-navy-800/50 p-6 rounded-lg border-l-4 border-gold-500 mb-10 not-prose">
                             <h3 className="font-bold text-navy-900 dark:text-white text-sm uppercase tracking-wider mb-2">Executive Summary</h3>
-                            <p className="text-slate-600 dark:text-slate-300">
-                                {policy.content}
-                            </p>
+                            <div 
+                                className="text-slate-600 dark:text-slate-300"
+                                dangerouslySetInnerHTML={{ __html: policy.content }}
+                            />
                         </div>
                         
                         <h3>1. Purpose and Scope</h3>

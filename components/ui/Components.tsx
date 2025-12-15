@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, createContext, useContext } from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { ChevronDown, ChevronUp, Check, AlertTriangle, Info, XCircle, MoreVertical, Search, X, Loader2, Plus, Minus, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, AlertTriangle, Info, XCircle, MoreVertical, Search, X, Loader2, Plus, Minus, Calendar as CalendarIcon, Clock, Bold, Italic, Underline, List, ListOrdered, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
 // --- Utils ---
 export function cn(...inputs: ClassValue[]) {
@@ -328,6 +328,88 @@ export const Select: React.FC<SelectProps> = ({ className, label, error, id, chi
         <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-slate-500 dark:text-slate-400">
           <ChevronDown className="w-4 h-4" />
         </div>
+      </div>
+      {error && <p className="text-xs text-red-500">{error}</p>}
+    </div>
+  );
+};
+
+// --- Rich Text Editor (Custom) ---
+interface RichTextEditorProps {
+  label?: string;
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
+  error?: string;
+  placeholder?: string;
+}
+
+export const RichTextEditor: React.FC<RichTextEditorProps> = ({ label, value, onChange, className, error, placeholder }) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Only update innerHTML if it differs significantly or if the editor is empty and value is present
+    // This check prevents cursor jumping issues during typing if we were to update on every render
+    if (editorRef.current) {
+        if (editorRef.current.innerHTML !== value && document.activeElement !== editorRef.current) {
+            editorRef.current.innerHTML = value;
+        }
+    }
+  }, [value]);
+
+  const handleInput = () => {
+    if (editorRef.current) {
+        const html = editorRef.current.innerHTML;
+        onChange(html);
+    }
+  };
+
+  const exec = (command: string, value: string | undefined = undefined) => {
+    document.execCommand(command, false, value);
+    if (editorRef.current) {
+        editorRef.current.focus();
+    }
+  };
+
+  const ToolbarButton = ({ icon: Icon, command, arg, active }: any) => (
+    <button
+      type="button"
+      onClick={(e) => { e.preventDefault(); exec(command, arg); }}
+      className={cn(
+        "p-1.5 rounded hover:bg-slate-200 dark:hover:bg-navy-700 text-slate-600 dark:text-slate-300 transition-colors",
+        active && "bg-slate-200 dark:bg-navy-700 text-navy-900 dark:text-white"
+      )}
+    >
+      <Icon className="w-4 h-4" />
+    </button>
+  );
+
+  return (
+    <div className={cn("w-full space-y-1.5", className)}>
+      {label && <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">{label}</label>}
+      <div className={cn(
+          "border border-slate-300 dark:border-navy-600 rounded-md overflow-hidden bg-white dark:bg-navy-950 focus-within:ring-2 focus-within:ring-navy-900 dark:focus-within:ring-gold-500 transition-all",
+          error && "border-red-500 focus-within:ring-red-500"
+      )}>
+        <div className="flex items-center gap-1 p-2 border-b border-slate-200 dark:border-navy-700 bg-slate-50 dark:bg-navy-900">
+           <ToolbarButton icon={Bold} command="bold" />
+           <ToolbarButton icon={Italic} command="italic" />
+           <ToolbarButton icon={Underline} command="underline" />
+           <div className="w-px h-4 bg-slate-300 dark:bg-navy-600 mx-1" />
+           <ToolbarButton icon={List} command="insertUnorderedList" />
+           <ToolbarButton icon={ListOrdered} command="insertOrderedList" />
+           <div className="w-px h-4 bg-slate-300 dark:bg-navy-600 mx-1" />
+           <ToolbarButton icon={AlignLeft} command="justifyLeft" />
+           <ToolbarButton icon={AlignCenter} command="justifyCenter" />
+           <ToolbarButton icon={AlignRight} command="justifyRight" />
+        </div>
+        <div
+          ref={editorRef}
+          contentEditable
+          onInput={handleInput}
+          className="min-h-[200px] p-3 text-sm text-slate-900 dark:text-white focus:outline-none prose prose-sm dark:prose-invert max-w-none"
+          data-placeholder={placeholder}
+        />
       </div>
       {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
