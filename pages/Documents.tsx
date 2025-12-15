@@ -152,7 +152,7 @@ const Documents = () => {
             dateUploaded: 'Just now',
             size: formatBytes(selectedFile.size),
             type: fileExt,
-            uploadedBy: `${user.firstName} ${user.lastName}`,
+            uploadedBy: `${user.firstName} ${user.surname}`,
             version: 1,
             history: [],
             notes: 'Initial Upload',
@@ -163,7 +163,7 @@ const Documents = () => {
         // Notify HR
         addApproval({
           type: 'Document',
-          user: `${user.firstName} ${user.lastName}`,
+          user: `${user.firstName} ${user.surname}`,
           detail: `Uploaded new document: ${newDocData.title}`,
           data: { documentId: newDoc.id }
         });
@@ -199,7 +199,7 @@ const Documents = () => {
         status: 'pending',
         size: formatBytes(selectedFile.size),
         type: fileExt,
-        uploadedBy: `${user.firstName} ${user.lastName}`,
+        uploadedBy: `${user.firstName} ${user.surname}`,
         history: [historyEntry, ...(uploadVersionDoc.history || [])],
         notes: versionNotes,
         url: previewUrl
@@ -210,7 +210,7 @@ const Documents = () => {
       // Notify HR
       addApproval({
         type: 'Document',
-        user: `${user.firstName} ${user.lastName}`,
+        user: `${user.firstName} ${user.surname}`,
         detail: `Updated document: ${uploadVersionDoc.title} (v${uploadVersionDoc.version + 1})`,
         data: { documentId: updatedDoc.id }
       });

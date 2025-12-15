@@ -3,18 +3,42 @@ import React from 'react';
 export type Role = 'staff' | 'hr' | 'admin';
 
 export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
+  id: string; // bigint(20) UNSIGNED
+  serviceNumber: string; // service_no
+  username?: string; // username
+  email: string; // email
+  surname: string; // surname
+  firstName: string; // first_name
+  otherNames?: string; // other_names
+  gender?: string; // sex
+  
+  // Rank & Position
+  initialRank?: string; // initial_rank
+  presentRank: string; // present_rank (was position)
+  level?: string; // level
+  department: string; // department
+  fileNumber?: string; // file_no
+  duty?: string; // duty
+  description?: string; // description
+
+  // Location
+  assignedState?: string; // assigned_state
+  prison?: string; // prison
+  
+  // Bio
+  dateOfBirth?: string; // dob
+  stateOfOrigin?: string; // state_of_origin
+  lga?: string; // lga
+  
+  avatarUrl?: string; // photo
+  status: 'active' | 'inactive' | 'on-leave'; // status (int)
+  lastLogin?: string; // last_login
+  
+  // App Specific (Derived or Aux)
   role: Role;
-  department: string;
-  position: string;
-  avatarUrl?: string;
-  status: 'active' | 'inactive' | 'on-leave';
-  joinDate: string;
-  phone?: string;
-  location?: string;
+  joinDate: string; // created_at
+  phone?: string; 
+  location?: string; // Derived from assignedState/prison
 }
 
 export interface BioData {

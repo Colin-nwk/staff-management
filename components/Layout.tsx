@@ -391,7 +391,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
                >
                  <div className="relative">
                     <img 
-                        src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=fbbf24&color=0f172a`} 
+                        src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.firstName}+${user.surname}&background=fbbf24&color=0f172a`} 
                         alt="Profile" 
                         className="w-8 h-8 rounded-full border-2 border-white dark:border-navy-700 shadow-sm object-cover group-hover:scale-105 transition-transform"
                     />
@@ -412,7 +412,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
                {isUserMenuOpen && (
                  <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-navy-800 rounded-xl shadow-xl shadow-navy-900/10 border border-slate-100 dark:border-navy-700 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
                     <div className="p-4 border-b border-slate-100 dark:border-navy-700 bg-slate-50/50 dark:bg-navy-900/50">
-                        <p className="text-sm font-bold text-navy-900 dark:text-white">{user.firstName} {user.lastName}</p>
+                        <p className="text-sm font-bold text-navy-900 dark:text-white">{user.firstName} {user.surname}</p>
                         <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
                     </div>
                     <div className="p-2 space-y-1">

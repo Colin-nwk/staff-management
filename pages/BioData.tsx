@@ -60,7 +60,7 @@ const BioData = () => {
     setTimeout(() => {
       addApproval({
         type: 'Bio Data',
-        user: user ? `${user.firstName} ${user.lastName}` : 'Staff Member',
+        user: user ? `${user.firstName} ${user.surname}` : 'Staff Member',
         detail: 'Updated Bio Data Information',
         data: formData
       });

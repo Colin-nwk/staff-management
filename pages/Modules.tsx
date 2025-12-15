@@ -59,11 +59,11 @@ const Modules = () => {
              {user && (
                  <>
                     <div className="hidden sm:block text-right mr-2">
-                        <p className="text-sm font-medium text-navy-900 dark:text-white">{user.firstName} {user.lastName}</p>
+                        <p className="text-sm font-medium text-navy-900 dark:text-white">{user.firstName} {user.surname}</p>
                         <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">{user.role}</p>
                     </div>
                     <img 
-                    src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=fbbf24&color=0f172a`} 
+                    src={user.avatarUrl || `https://ui-avatars.com/api/?name=${user.firstName}+${user.surname}&background=fbbf24&color=0f172a`} 
                     alt="Profile" 
                     className="w-10 h-10 rounded-full border-2 border-white dark:border-navy-700 shadow-sm object-cover" 
                     />

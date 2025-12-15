@@ -49,7 +49,7 @@ const IDCardModal: React.FC<IDCardModalProps> = ({ isOpen, onClose, user }) => {
         useCORS: true
       });
       const link = document.createElement('a');
-      link.download = `NCoS_ID_${user.firstName}_${user.lastName}.png`;
+      link.download = `NCoS_ID_${user.firstName}_${user.surname}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch (err) {
@@ -154,9 +154,9 @@ const IDCardModal: React.FC<IDCardModalProps> = ({ isOpen, onClose, user }) => {
 
              {/* 3. User Identity (Centered & Tight) */}
              <div className="text-center px-4 relative z-10 mt-1">
-                <h2 className="text-2xl font-bold leading-tight text-white mb-1">{user.firstName} {user.lastName}</h2>
+                <h2 className="text-2xl font-bold leading-tight text-white mb-1">{user.firstName} {user.surname}</h2>
                 <div className="inline-block px-4 py-0.5 bg-gold-500 text-navy-900 rounded-full text-[10px] font-bold uppercase tracking-wider mb-1 shadow-sm">
-                    {user.position}
+                    {user.presentRank}
                 </div>
                 <p className="text-[10px] text-slate-300 uppercase tracking-wide opacity-80">{user.department} Dept.</p>
              </div>
@@ -165,8 +165,8 @@ const IDCardModal: React.FC<IDCardModalProps> = ({ isOpen, onClose, user }) => {
              <div className="px-6 py-4 relative z-10">
                 <div className="bg-white/10 rounded-lg p-2 border border-white/10 backdrop-blur-md flex justify-around items-center text-center divide-x divide-white/20">
                     <div className="flex-1 px-1">
-                        <span className="block text-[8px] text-slate-300 uppercase tracking-wider font-semibold mb-0.5">Staff ID</span>
-                        <span className="block text-sm font-mono font-bold text-white tracking-wide">{user.id.toUpperCase().replace('NEX', 'NCoS')}</span>
+                        <span className="block text-[8px] text-slate-300 uppercase tracking-wider font-semibold mb-0.5">Service No</span>
+                        <span className="block text-sm font-mono font-bold text-white tracking-wide">{user.serviceNumber}</span>
                     </div>
                      <div className="flex-1 px-1">
                         <span className="block text-[8px] text-slate-300 uppercase tracking-wider font-semibold mb-0.5">Joined</span>

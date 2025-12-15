@@ -47,7 +47,7 @@ const StaffDashboard = () => {
     setTimeout(() => {
       addApproval({
         type: 'Leave Request',
-        user: user ? `${user.firstName} ${user.lastName}` : 'Staff Member',
+        user: user ? `${user.firstName} ${user.surname}` : 'Staff Member',
         detail: `${leaveData.reason} (${leaveData.startDate} to ${leaveData.endDate})`
       });
 
@@ -216,7 +216,7 @@ const HRDashboard = () => {
           version: '1.0',
           dateUpdated: new Date().toISOString().split('T')[0],
           category: 'General', // Defaulting for simplicity
-          uploadedBy: `${user.firstName} ${user.lastName}`
+          uploadedBy: `${user.firstName} ${user.surname}`
       };
       addPolicy(newPolicy);
 

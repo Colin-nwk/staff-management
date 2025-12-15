@@ -449,7 +449,7 @@ export default function App() {
              updateDocumentStatus(item.data.documentId, status as 'approved' | 'rejected');
         }
 
-        const targetUser = MOCK_USERS.find(u => `${u.firstName} ${u.lastName}` === item.user);
+        const targetUser = MOCK_USERS.find(u => `${u.firstName} ${u.surname}` === item.user);
         if (targetUser) {
            addNotification({
              title: `Request ${status === 'approved' ? 'Approved' : 'Rejected'}`,
@@ -473,7 +473,7 @@ export default function App() {
       priority,
       status: 'open',
       createdBy: user.id,
-      createdByName: `${user.firstName} ${user.lastName}`,
+      createdByName: `${user.firstName} ${user.surname}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       messages: []
@@ -492,7 +492,7 @@ export default function App() {
     const newMessage: Message = {
       id: `msg${Date.now()}`,
       senderId: user.id,
-      senderName: `${user.firstName} ${user.lastName}`,
+      senderName: `${user.firstName} ${user.surname}`,
       role: user.role,
       content,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
