@@ -103,6 +103,8 @@ export const useDocuments = () => {
 interface PolicyContextType {
   policies: Policy[];
   addPolicy: (policy: Policy) => void;
+  updatePolicy: (policy: Policy) => void;
+  deletePolicy: (id: string) => void;
 }
 
 const PolicyContext = createContext<PolicyContextType | undefined>(undefined);
@@ -327,6 +329,14 @@ export default function App() {
 
   const addPolicy = (policy: Policy) => {
     setPolicies(prev => [policy, ...prev]);
+  };
+
+  const updatePolicy = (updatedPolicy: Policy) => {
+    setPolicies(prev => prev.map(p => p.id === updatedPolicy.id ? updatedPolicy : p));
+  };
+
+  const deletePolicy = (id: string) => {
+    setPolicies(prev => prev.filter(p => p.id !== id));
   };
 
   // Approval State
@@ -561,7 +571,7 @@ export default function App() {
         <ToastContext.Provider value={{ toast }}>
           <NotificationContext.Provider value={{ notifications: userNotifications, unreadCount, addNotification, markAsRead, markAllAsRead }}>
             <DocumentContext.Provider value={{ documents, addDocument, updateDocument, updateDocumentStatus }}>
-              <PolicyContext.Provider value={{ policies, addPolicy }}>
+              <PolicyContext.Provider value={{ policies, addPolicy, updatePolicy, deletePolicy }}>
                 <ApprovalContext.Provider value={{ approvals, addApproval, processApproval }}>
                   <ComplaintContext.Provider value={{ complaints, createComplaint, sendMessage, updateStatus }}>
                     <Router>

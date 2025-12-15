@@ -1,14 +1,36 @@
 import React, { useState } from 'react';
-import { Card, Button, Input, Select, Badge } from '../components/ui/Components';
-import { usePolicies } from '../App';
-import { BookOpen, Search, Shield, HardDrive, Download, Calendar, User, Eye, FileText, ArrowRight } from 'lucide-react';
+import { Card, Button, Input, Select, Badge, Modal, TextArea } from '../components/ui/Components';
+import { usePolicies, useAuth, useToast } from '../App';
+import { BookOpen, Search, Shield, HardDrive, Download, Calendar, User, Eye, FileText, ArrowRight, Plus, MoreVertical, Edit2, Trash2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Policy } from '../types';
 
 const Policies = () => {
-  const { policies } = usePolicies();
+  const { policies, addPolicy, updatePolicy, deletePolicy } = usePolicies();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  // State
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
-  const navigate = useNavigate();
+  
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingPolicy, setEditingPolicy] = useState<Policy | null>(null);
+  
+  // Dropdown State
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    category: 'General' as 'HR' | 'IT' | 'General' | 'Safety',
+    version: '1.0'
+  });
+
+  const canManage = user?.role === 'hr' || user?.role === 'admin';
 
   // Filter and sort policies
   const filteredPolicies = policies.filter(policy => {
@@ -35,6 +57,82 @@ const Policies = () => {
           default: return 'bg-gold-50 dark:bg-gold-900/20';
       }
   };
+
+  // --- Handlers ---
+
+  const handleOpenAdd = () => {
+    setEditingPolicy(null);
+    setFormData({ title: '', content: '', category: 'General', version: '1.0' });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (e: React.MouseEvent, policy: Policy) => {
+    e.stopPropagation(); // Prevent card click
+    setEditingPolicy(policy);
+    setFormData({
+      title: policy.title,
+      content: policy.content,
+      category: policy.category,
+      version: policy.version
+    });
+    setOpenDropdownId(null);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation(); // Prevent card click
+    if (window.confirm("Are you sure you want to delete this policy?")) {
+        deletePolicy(id);
+        toast('success', 'Policy deleted successfully.');
+        setOpenDropdownId(null);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    
+    setIsSubmitting(true);
+    
+    setTimeout(() => {
+        if (editingPolicy) {
+            // Update
+            const updated: Policy = {
+                ...editingPolicy,
+                title: formData.title,
+                content: formData.content,
+                category: formData.category,
+                version: formData.version,
+                dateUpdated: new Date().toISOString().split('T')[0],
+                uploadedBy: `${user.firstName} ${user.lastName}`
+            };
+            updatePolicy(updated);
+            toast('success', 'Policy updated successfully.');
+        } else {
+            // Create
+            const newPolicy: Policy = {
+                id: `p${Date.now()}`,
+                title: formData.title,
+                content: formData.content,
+                category: formData.category,
+                version: formData.version,
+                dateUpdated: new Date().toISOString().split('T')[0],
+                uploadedBy: `${user.firstName} ${user.lastName}`
+            };
+            addPolicy(newPolicy);
+            toast('success', 'New policy created successfully.');
+        }
+        setIsSubmitting(false);
+        setIsModalOpen(false);
+    }, 800);
+  };
+
+  // Close dropdowns on click outside
+  React.useEffect(() => {
+    const handleClick = () => setOpenDropdownId(null);
+    window.addEventListener('click', handleClick);
+    return () => window.removeEventListener('click', handleClick);
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -66,6 +164,11 @@ const Policies = () => {
                     <option value="Safety">Safety</option>
                 </Select>
              </div>
+             {canManage && (
+                 <Button onClick={handleOpenAdd}>
+                     <Plus className="w-4 h-4 mr-2" /> Add Policy
+                 </Button>
+             )}
          </div>
        </div>
 
@@ -73,7 +176,7 @@ const Policies = () => {
           {filteredPolicies.map(policy => (
               <Card 
                 key={policy.id} 
-                className="flex flex-col h-full hover:shadow-lg transition-all duration-300 cursor-pointer group border-l-4 border-l-transparent hover:border-l-gold-500"
+                className="flex flex-col h-full hover:shadow-lg transition-all duration-300 cursor-pointer group border-l-4 border-l-transparent hover:border-l-gold-500 relative"
                 onClick={() => navigate(`/policies/${policy.id}`)}
               >
                   {/* Header */}
@@ -81,7 +184,38 @@ const Policies = () => {
                       <div className={`p-2 rounded-lg ${getCategoryColor(policy.category)}`}>
                           {getCategoryIcon(policy.category)}
                       </div>
-                      <Badge variant="outline">v{policy.version}</Badge>
+                      <div className="flex items-center gap-2">
+                          <Badge variant="outline">v{policy.version}</Badge>
+                          {canManage && (
+                              <div className="relative">
+                                  <button 
+                                    className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-navy-700 text-slate-400 hover:text-navy-900 dark:hover:text-white transition-colors"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setOpenDropdownId(openDropdownId === policy.id ? null : policy.id);
+                                    }}
+                                  >
+                                      <MoreVertical className="w-4 h-4" />
+                                  </button>
+                                  {openDropdownId === policy.id && (
+                                      <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-navy-800 rounded-md shadow-xl border border-slate-200 dark:border-navy-700 z-10 animate-in fade-in zoom-in-95 duration-200">
+                                          <button 
+                                            className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-navy-700 flex items-center gap-2"
+                                            onClick={(e) => handleOpenEdit(e, policy)}
+                                          >
+                                              <Edit2 className="w-3.5 h-3.5" /> Edit
+                                          </button>
+                                          <button 
+                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                                            onClick={(e) => handleDelete(e, policy.id)}
+                                          >
+                                              <Trash2 className="w-3.5 h-3.5" /> Delete
+                                          </button>
+                                      </div>
+                                  )}
+                              </div>
+                          )}
+                      </div>
                   </div>
                   
                   <h3 className="text-lg font-medium text-navy-900 dark:text-white mb-2 line-clamp-2 group-hover:text-gold-600 dark:group-hover:text-gold-500 transition-colors">
@@ -117,6 +251,60 @@ const Policies = () => {
                </Button>
            </div>
        )}
+
+       {/* Create/Edit Modal */}
+       <Modal
+         isOpen={isModalOpen}
+         onClose={() => setIsModalOpen(false)}
+         title={editingPolicy ? 'Edit Policy' : 'Create New Policy'}
+       >
+           <form onSubmit={handleSubmit} className="space-y-4">
+               <Input 
+                 label="Policy Title" 
+                 value={formData.title} 
+                 onChange={e => setFormData({...formData, title: e.target.value})}
+                 required
+                 placeholder="e.g. Remote Work Policy"
+               />
+               
+               <div className="grid grid-cols-2 gap-4">
+                   <div>
+                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Category</label>
+                       <select 
+                         className="flex h-10 w-full rounded-md border border-slate-300 dark:border-navy-600 bg-white dark:bg-navy-950 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-gold-500"
+                         value={formData.category}
+                         onChange={e => setFormData({...formData, category: e.target.value as any})}
+                       >
+                           <option value="General">General</option>
+                           <option value="HR">Human Resources</option>
+                           <option value="IT">IT & Security</option>
+                           <option value="Safety">Safety</option>
+                       </select>
+                   </div>
+                   <Input 
+                     label="Version" 
+                     value={formData.version} 
+                     onChange={e => setFormData({...formData, version: e.target.value})}
+                     required
+                     placeholder="e.g. 1.0"
+                   />
+               </div>
+
+               <TextArea 
+                 label="Policy Content / Summary"
+                 value={formData.content}
+                 onChange={e => setFormData({...formData, content: e.target.value})}
+                 required
+                 rows={6}
+                 placeholder="Enter the main details of the policy here..."
+               />
+
+               <div className="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-navy-700">
+                   <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                   <Button type="submit" isLoading={isSubmitting}>{editingPolicy ? 'Save Changes' : 'Create Policy'}</Button>
+               </div>
+           </form>
+       </Modal>
     </div>
   );
 };

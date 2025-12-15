@@ -8,9 +8,14 @@ import { DataTable } from '../components/ui/DataTable';
 import { useToast } from '../App';
 import { 
   Bell, CheckCircle, AlertTriangle, Info, MoreVertical, 
-  Trash2, Edit2, Copy, ShoppingCart, CreditCard, Box, User, ArrowRight, ArrowLeft
+  Trash2, Edit2, Copy, ShoppingCart, CreditCard, Box, User, ArrowRight, ArrowLeft, BarChart as BarChartIcon
 } from 'lucide-react';
 import { ColumnDef } from '@tanstack/react-table';
+import { 
+  BarChart, Bar, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell, 
+  XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, 
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis 
+} from 'recharts';
 
 // --- Mock Data for Table ---
 type Payment = {
@@ -76,6 +81,35 @@ const columns: ColumnDef<Payment>[] = [
     },
   },
 ]
+
+// --- Mock Data for Charts ---
+const chartData = [
+  { name: 'Jan', sales: 4000, revenue: 2400, amt: 2400 },
+  { name: 'Feb', sales: 3000, revenue: 1398, amt: 2210 },
+  { name: 'Mar', sales: 2000, revenue: 9800, amt: 2290 },
+  { name: 'Apr', sales: 2780, revenue: 3908, amt: 2000 },
+  { name: 'May', sales: 1890, revenue: 4800, amt: 2181 },
+  { name: 'Jun', sales: 2390, revenue: 3800, amt: 2500 },
+  { name: 'Jul', sales: 3490, revenue: 4300, amt: 2100 },
+];
+
+const pieData = [
+  { name: 'Engineering', value: 400 },
+  { name: 'Marketing', value: 300 },
+  { name: 'Sales', value: 300 },
+  { name: 'HR', value: 200 },
+];
+
+const radarData = [
+  { subject: 'Leadership', A: 120, B: 110, fullMark: 150 },
+  { subject: 'Technical', A: 98, B: 130, fullMark: 150 },
+  { subject: 'Communication', A: 86, B: 130, fullMark: 150 },
+  { subject: 'Teamwork', A: 99, B: 100, fullMark: 150 },
+  { subject: 'Punctuality', A: 85, B: 90, fullMark: 150 },
+  { subject: 'Initiative', A: 65, B: 85, fullMark: 150 },
+];
+
+const COLORS = ['#008751', '#f59e0b', '#0ea5e9', '#64748b'];
 
 const Components = () => {
   const { toast } = useToast();
@@ -402,6 +436,122 @@ const Components = () => {
                         {currentStep === steps.length - 1 ? 'Submit' : 'Next'} 
                         {currentStep !== steps.length - 1 && <ArrowRight className="w-4 h-4 ml-2" />}
                     </Button>
+                </div>
+            </Card>
+        </div>
+      </section>
+
+      {/* --- Charts --- */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-medium border-b border-slate-200 dark:border-navy-800 pb-2">Charts & Data Visualization</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="h-96 flex flex-col">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base font-medium text-navy-900 dark:text-white">Revenue Trend</h3>
+                    <Select className="w-32 h-8 text-xs">
+                        <option>This Year</option>
+                        <option>Last Year</option>
+                    </Select>
+                </div>
+                <div className="flex-1 min-h-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#008751" stopOpacity={0.3}/>
+                                    <stop offset="95%" stopColor="#008751" stopOpacity={0}/>
+                                </linearGradient>
+                                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
+                                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" strokeOpacity={0.5} />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
+                            <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                            <RechartsTooltip 
+                                contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} 
+                                cursor={{stroke: '#94a3b8', strokeWidth: 1}}
+                            />
+                            <Legend verticalAlign="top" height={36} iconType="circle" />
+                            <Area type="monotone" dataKey="sales" name="Sales" stroke="#008751" strokeWidth={2} fillOpacity={1} fill="url(#colorSales)" />
+                            <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#f59e0b" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+            </Card>
+
+            <Card className="h-96 flex flex-col">
+                <h3 className="text-base font-medium text-navy-900 dark:text-white mb-4">Monthly Comparisons</h3>
+                <div className="flex-1 min-h-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" strokeOpacity={0.5} />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
+                            <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                            <RechartsTooltip cursor={{fill: '#f1f5f9', opacity: 0.5}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
+                            <Legend verticalAlign="top" height={36} iconType="circle"/>
+                            <Bar dataKey="sales" name="Sales" fill="#008751" radius={[4, 4, 0, 0]} barSize={20} />
+                            <Bar dataKey="revenue" name="Revenue" fill="#0ea5e9" radius={[4, 4, 0, 0]} barSize={20} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </Card>
+
+            <Card className="h-96 flex flex-col">
+                <h3 className="text-base font-medium text-navy-900 dark:text-white mb-4">Staff Distribution</h3>
+                <div className="flex-1 min-h-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={pieData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={100}
+                                fill="#8884d8"
+                                paddingAngle={5}
+                                dataKey="value"
+                            >
+                                {pieData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} strokeWidth={0} />
+                                ))}
+                            </Pie>
+                            <RechartsTooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
+                            <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+            </Card>
+
+            <Card className="h-96 flex flex-col">
+                <h3 className="text-base font-medium text-navy-900 dark:text-white mb-4">Performance Metrics</h3>
+                <div className="flex-1 min-h-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                            <PolarGrid stroke="#e2e8f0" />
+                            <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 11 }} />
+                            <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
+                            <Radar
+                                name="Employee Average"
+                                dataKey="A"
+                                stroke="#008751"
+                                strokeWidth={2}
+                                fill="#008751"
+                                fillOpacity={0.3}
+                            />
+                            <Radar
+                                name="Department Target"
+                                dataKey="B"
+                                stroke="#f59e0b"
+                                strokeWidth={2}
+                                fill="#f59e0b"
+                                fillOpacity={0.3}
+                            />
+                            <Legend />
+                            <RechartsTooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
+                        </RadarChart>
+                    </ResponsiveContainer>
                 </div>
             </Card>
         </div>
