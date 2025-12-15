@@ -19,6 +19,7 @@ import Policies from './pages/Policies';
 import PolicyDetail from './pages/PolicyDetail';
 import ForgotPassword from './pages/ForgotPassword';
 import Modules from './pages/Modules';
+import Components from './pages/Components';
 
 // --- Theme Context ---
 type Theme = 'light' | 'dark';
@@ -232,6 +233,14 @@ const AppContent = () => {
         <ProtectedRoute>
           <Layout user={user!} onLogout={logout} pendingApprovals={pendingCount}>
             <Complaints />
+          </Layout>
+        </ProtectedRoute>
+      } />
+
+      <Route path="/components" element={
+        <ProtectedRoute>
+          <Layout user={user!} onLogout={logout} pendingApprovals={pendingCount}>
+            <Components />
           </Layout>
         </ProtectedRoute>
       } />

@@ -21,7 +21,8 @@ import {
   CreditCard,
   PanelLeftClose,
   PanelLeftOpen,
-  LayoutGrid
+  LayoutGrid,
+  Layers
 } from 'lucide-react';
 import { User } from '../types';
 import { cn } from './ui/Components';
@@ -227,6 +228,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, pendin
                   </div>
             )}
             {isCollapsed && <div className="h-4"></div>}
+            <NavigationItem to="/components" icon={Layers} label="Components" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
             <NavigationItem to="/" icon={LayoutGrid} label="All Modules" onClick={() => setIsSidebarOpen(false)} isCollapsed={isCollapsed} />
         </nav>
         
