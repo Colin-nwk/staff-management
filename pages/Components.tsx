@@ -114,7 +114,7 @@ const COLORS = ['#008751', '#f59e0b', '#0ea5e9', '#64748b'];
 const Components = () => {
   const { toast } = useToast();
   const [switchState, setSwitchState] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   // State for Advanced Inputs
   const [searchValue, setSearchValue] = useState('');
@@ -194,6 +194,13 @@ const Components = () => {
             <Button size="sm">Small</Button>
             <Button size="md">Medium</Button>
             <Button size="lg">Large</Button>
+        </div>
+        <div className="flex flex-wrap gap-4 items-center">
+            <Button><User className="w-4 h-4 mr-2" /> Icon Left</Button>
+            <Button variant="outline">Icon Right <ArrowRight className="w-4 h-4 ml-2" /></Button>
+            <Button variant="secondary"><ShoppingCart className="w-4 h-4 mr-2" /> Buy Now</Button>
+            <Button size="sm" variant="ghost" title="Delete"><Trash2 className="w-4 h-4" /></Button>
+            <Button size="md" variant="outline" className="gap-2"><Box className="w-4 h-4" /> Flex Gap</Button>
         </div>
       </section>
 
@@ -619,22 +626,79 @@ const Components = () => {
                     />
                 </div>
                 <div>
-                    <h4 className="text-sm font-medium mb-3">Modal Dialog</h4>
-                    <Button onClick={() => setModalOpen(true)}>Open Confirmation Modal</Button>
-                    <Modal 
-                        isOpen={modalOpen} 
-                        onClose={() => setModalOpen(false)} 
-                        title="Confirm Action"
-                        footer={
-                            <>
-                                <Button variant="ghost" onClick={() => setModalOpen(false)}>Cancel</Button>
-                                <Button onClick={() => setModalOpen(false)}>Confirm</Button>
-                            </>
-                        }
+                    <h4 className="text-sm font-medium mb-3">Modal Sizes</h4>
+                    <div className="flex flex-wrap gap-3">
+                        <Button size="sm" onClick={() => setActiveModal('sm')}>Small</Button>
+                        <Button size="sm" onClick={() => setActiveModal('default')}>Default</Button>
+                        <Button size="sm" onClick={() => setActiveModal('lg')}>Large</Button>
+                        <Button size="sm" onClick={() => setActiveModal('xl')}>Extra Large</Button>
+                        <Button size="sm" onClick={() => setActiveModal('full')}>Full Width</Button>
+                    </div>
+
+                    {/* Small Modal */}
+                    <Modal
+                        isOpen={activeModal === 'sm'}
+                        onClose={() => setActiveModal(null)}
+                        title="Small Modal"
+                        className="max-w-sm"
+                        footer={<Button size="sm" onClick={() => setActiveModal(null)}>Close</Button>}
                     >
-                        <p className="text-slate-600 dark:text-slate-300">
-                            Are you sure you want to proceed? This action cannot be undone.
-                        </p>
+                        <p className="text-slate-600 dark:text-slate-300">This is a small modal suitable for simple confirmations or alerts.</p>
+                    </Modal>
+
+                    {/* Default Modal */}
+                    <Modal
+                        isOpen={activeModal === 'default'}
+                        onClose={() => setActiveModal(null)}
+                        title="Default Modal"
+                        // Default max-w-md is applied by component
+                        footer={<Button onClick={() => setActiveModal(null)}>Close</Button>}
+                    >
+                        <p className="text-slate-600 dark:text-slate-300">This is the default size modal, perfect for standard forms and dialogs.</p>
+                    </Modal>
+
+                    {/* Large Modal */}
+                    <Modal
+                        isOpen={activeModal === 'lg'}
+                        onClose={() => setActiveModal(null)}
+                        title="Large Modal"
+                        className="max-w-2xl"
+                        footer={<Button onClick={() => setActiveModal(null)}>Close</Button>}
+                    >
+                        <p className="text-slate-600 dark:text-slate-300 mb-4">This is a large modal (max-w-2xl). It offers more space for complex content.</p>
+                        <div className="h-32 bg-slate-100 dark:bg-navy-900 rounded-lg flex items-center justify-center text-slate-400">
+                            Placeholder Content
+                        </div>
+                    </Modal>
+
+                    {/* Extra Large Modal */}
+                    <Modal
+                        isOpen={activeModal === 'xl'}
+                        onClose={() => setActiveModal(null)}
+                        title="Extra Large Modal"
+                        className="max-w-5xl"
+                        footer={<Button onClick={() => setActiveModal(null)}>Close</Button>}
+                    >
+                        <p className="text-slate-600 dark:text-slate-300 mb-4">This is an extra large modal (max-w-5xl), great for data tables or wide layouts.</p>
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="h-32 bg-slate-100 dark:bg-navy-900 rounded-lg"></div>
+                            <div className="h-32 bg-slate-100 dark:bg-navy-900 rounded-lg"></div>
+                            <div className="h-32 bg-slate-100 dark:bg-navy-900 rounded-lg"></div>
+                        </div>
+                    </Modal>
+
+                    {/* Full Width Modal */}
+                    <Modal
+                        isOpen={activeModal === 'full'}
+                        onClose={() => setActiveModal(null)}
+                        title="Full Width Modal"
+                        className="w-[95vw] max-w-none h-[80vh]"
+                        footer={<Button onClick={() => setActiveModal(null)}>Close</Button>}
+                    >
+                        <p className="text-slate-600 dark:text-slate-300 mb-4">This modal takes up most of the screen width.</p>
+                        <div className="h-full bg-slate-50 dark:bg-navy-900 rounded-lg border-2 border-dashed border-slate-200 dark:border-navy-700 flex items-center justify-center text-slate-400">
+                            Extensive Content Area
+                        </div>
                     </Modal>
                 </div>
             </div>
